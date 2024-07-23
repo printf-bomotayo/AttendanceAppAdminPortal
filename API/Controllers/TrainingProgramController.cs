@@ -1,14 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using API.Entities;
 using API.Services.TrainingProgramService;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-     public class TrainingProgramController : BaseApiController
+    public class TrainingProgramController : BaseApiController
     {
         private readonly ITrainingProgramService _trainingProgramService;
         public TrainingProgramController(ITrainingProgramService trainingProgramService)

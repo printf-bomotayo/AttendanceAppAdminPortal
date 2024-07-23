@@ -12,7 +12,6 @@ namespace API.Data
         }
 
         public DbSet<Candidate> Candidates { get; set; }
-
         public DbSet<AttendanceRecord> AttendanceRecords { get; set; }
          public DbSet<Cohort> Cohorts { get; set; }
         public DbSet<TrainingProgram> TrainingPrograms { get; set; }
@@ -21,7 +20,7 @@ namespace API.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+            // base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<IdentityRole>()
             .HasData(
@@ -34,7 +33,12 @@ namespace API.Data
                 .WithMany(tp => tp.CohortList)
                 .HasForeignKey(c => c.TrainingProgramId);
 
-           // base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<AttendanceRecord>()
+            .HasOne(ar => ar.Candidate)
+            .WithMany(c => c.AttendanceRecords)
+            .HasForeignKey(ar => ar.CandidateId);
+
+           base.OnModelCreating(modelBuilder);
         }
 
     }
