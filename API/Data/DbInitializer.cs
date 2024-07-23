@@ -1,12 +1,41 @@
 using API.Entities;
+using Microsoft.AspNetCore.Identity;
 
 namespace API.Data
 {
     public static class DbInitializer
     {
-        public static void Initialize(AppDbContext context)
+        public static async Task Initialize(AppDbContext context, UserManager<User> userManager)
         {
-            if (context.Candidates.Any()) return;
+            if (!userManager.Users.Any())
+            {
+                var user = new User 
+                {
+                    UserName = "Victor",
+                    Email = "victor@test.com"
+                };
+
+                await userManager.CreateAsync(user, "P@$$w0rd");
+                await userManager.AddToRoleAsync(user, "Member");
+
+                var admin = new User
+                {
+                    UserName = "admin",
+                    Email = "admin@test.com"
+                };
+
+                await userManager.CreateAsync(admin, "P@$$w0rd");
+                await userManager.AddToRolesAsync(admin, new[] {"Member", "Admin"});
+            }
+
+            if (context.Candidates.Any()) 
+            {
+               context.Candidates.RemoveRange();
+            }
+            if (context.AttendanceRecords.Any())
+            {
+                context.AttendanceRecords.RemoveRange();
+            }
 
             var candidates = new List<Candidate>
             {
@@ -64,11 +93,51 @@ namespace API.Data
             
             context.Candidates.AddRange(candidates);
 
+            var attendanceRecords = new List<AttendanceRecord> 
+            {
+                new AttendanceRecord { CandidateId = 1, Candidate = new Candidate { FirstName = "Liam", LastName = "Smith", Email = "liam.smith@example.com", PhoneNumber = "123-456-7890", CohortId = 1 }, Date = DateTime.Now.AddDays(-1), Status = AttendanceStatus.Early, CheckInTime = DateTime.Now.AddDays(-1).AddHours(9), CheckOutTime = DateTime.Now.AddDays(-1).AddHours(17) },
+                new AttendanceRecord { CandidateId = 2, Candidate = new Candidate { FirstName = "Emma", LastName = "Johnson", Email = "emma.johnson@example.com", PhoneNumber = "987-654-3210", CohortId = 2 }, Date = DateTime.Now.AddDays(-1), Status = AttendanceStatus.Absent },
+                new AttendanceRecord { CandidateId = 3, Candidate = new Candidate { FirstName = "Noah", LastName = "Williams", Email = "noah.williams@example.com", PhoneNumber = "555-555-5555", CohortId = 3 }, Date = DateTime.Now.AddDays(-1), Status = AttendanceStatus.Late, CheckInTime = DateTime.Now.AddDays(-1).AddHours(10), CheckOutTime = DateTime.Now.AddDays(-1).AddHours(17) },
+                new AttendanceRecord {  CandidateId = 4, Candidate = new Candidate { FirstName = "Olivia", LastName = "Brown", Email = "olivia.brown@example.com", PhoneNumber = "444-444-4444", CohortId = 4 }, Date = DateTime.Now.AddDays(-1), Status = AttendanceStatus.Early, CheckInTime = DateTime.Now.AddDays(-1).AddHours(9), CheckOutTime = DateTime.Now.AddDays(-1).AddHours(17) },
+                new AttendanceRecord { CandidateId = 5, Candidate = new Candidate { FirstName = "William", LastName = "Jones", Email = "william.jones@example.com", PhoneNumber = "333-333-3333", CohortId = 1 }, Date = DateTime.Now.AddDays(-1), Status = AttendanceStatus.Early, CheckInTime = DateTime.Now.AddDays(-1).AddHours(9), CheckOutTime = DateTime.Now.AddDays(-1).AddHours(17) },
+                new AttendanceRecord {  CandidateId = 6, Candidate = new Candidate { FirstName = "Ava", LastName = "Garcia", Email = "ava.garcia@example.com", PhoneNumber = "222-222-2222", CohortId = 2 }, Date = DateTime.Now.AddDays(-1), Status = AttendanceStatus.Absent },
+                new AttendanceRecord {  CandidateId = 7, Candidate = new Candidate { FirstName = "James", LastName = "Martinez", Email = "james.martinez@example.com", PhoneNumber = "111-111-1111", CohortId = 3 }, Date = DateTime.Now.AddDays(-1), Status = AttendanceStatus.Late, CheckInTime = DateTime.Now.AddDays(-1).AddHours(10), CheckOutTime = DateTime.Now.AddDays(-1).AddHours(17) },
+                new AttendanceRecord {  CandidateId = 8, Candidate = new Candidate { FirstName = "Isabella", LastName = "Rodriguez", Email = "isabella.rodriguez@example.com", PhoneNumber = "000-000-0000", CohortId = 4 }, Date = DateTime.Now.AddDays(-1), Status = AttendanceStatus.Early, CheckInTime = DateTime.Now.AddDays(-1).AddHours(9), CheckOutTime = DateTime.Now.AddDays(-1).AddHours(17) },
+                new AttendanceRecord {  CandidateId = 9, Candidate = new Candidate { FirstName = "Lucas", LastName = "Wilson", Email = "lucas.wilson@example.com", PhoneNumber = "123-123-1234", CohortId = 1 }, Date = DateTime.Now.AddDays(-1), Status = AttendanceStatus.Early, CheckInTime = DateTime.Now.AddDays(-1).AddHours(9), CheckOutTime = DateTime.Now.AddDays(-1).AddHours(17) },
+                new AttendanceRecord {  CandidateId = 10, Candidate = new Candidate { FirstName = "Sophia", LastName = "Anderson", Email = "sophia.anderson@example.com", PhoneNumber = "321-321-4321", CohortId = 2 }, Date = DateTime.Now.AddDays(-1), Status = AttendanceStatus.Absent },
+                new AttendanceRecord {  CandidateId = 11, Candidate = new Candidate { FirstName = "Mason", LastName = "Thomas", Email = "mason.thomas@example.com", PhoneNumber = "456-456-6543", CohortId = 3 }, Date = DateTime.Now.AddDays(-1), Status = AttendanceStatus.Late, CheckInTime = DateTime.Now.AddDays(-1).AddHours(10), CheckOutTime = DateTime.Now.AddDays(-1).AddHours(17) },
+                new AttendanceRecord {  CandidateId = 12, Candidate = new Candidate { FirstName = "Mia", LastName = "Taylor", Email = "mia.taylor@example.com", PhoneNumber = "654-654-3456", CohortId = 4 }, Date = DateTime.Now.AddDays(-1), Status = AttendanceStatus.Early, CheckInTime = DateTime.Now.AddDays(-1).AddHours(9), CheckOutTime = DateTime.Now.AddDays(-1).AddHours(17) },
+                new AttendanceRecord {  CandidateId = 1, Candidate = new Candidate { FirstName = "Liam", LastName = "Smith", Email = "liam.smith@example.com", PhoneNumber = "123-456-7890", CohortId = 1 }, Date = DateTime.Now.AddDays(-2), Status = AttendanceStatus.Early, CheckInTime = DateTime.Now.AddDays(-2).AddHours(9), CheckOutTime = DateTime.Now.AddDays(-2).AddHours(17) },
+                new AttendanceRecord {  CandidateId = 2, Candidate = new Candidate { FirstName = "Emma", LastName = "Johnson", Email = "emma.johnson@example.com", PhoneNumber = "987-654-3210", CohortId = 2 }, Date = DateTime.Now.AddDays(-2), Status = AttendanceStatus.Absent },
+                new AttendanceRecord {  CandidateId = 3, Candidate = new Candidate { FirstName = "Noah", LastName = "Williams", Email = "noah.williams@example.com", PhoneNumber = "555-555-5555", CohortId = 3 }, Date = DateTime.Now.AddDays(-2), Status = AttendanceStatus.Late, CheckInTime = DateTime.Now.AddDays(-2).AddHours(10), CheckOutTime = DateTime.Now.AddDays(-2).AddHours(17) },
+                new AttendanceRecord {  CandidateId = 4, Candidate = new Candidate { FirstName = "Olivia", LastName = "Brown", Email = "olivia.brown@example.com", PhoneNumber = "444-444-4444", CohortId = 4 }, Date = DateTime.Now.AddDays(-2), Status = AttendanceStatus.Early, CheckInTime = DateTime.Now.AddDays(-2).AddHours(9), CheckOutTime = DateTime.Now.AddDays(-2).AddHours(17) },
+                new AttendanceRecord {  CandidateId = 5, Candidate = new Candidate { FirstName = "William", LastName = "Jones", Email = "william.jones@example.com", PhoneNumber = "333-333-3333", CohortId = 1 }, Date = DateTime.Now.AddDays(-2), Status = AttendanceStatus.Early, CheckInTime = DateTime.Now.AddDays(-2).AddHours(9), CheckOutTime = DateTime.Now.AddDays(-2).AddHours(17) },
+                new AttendanceRecord {  CandidateId = 6, Candidate = new Candidate { FirstName = "Ava", LastName = "Garcia", Email = "ava.garcia@example.com", PhoneNumber = "222-222-2222", CohortId = 2 }, Date = DateTime.Now.AddDays(-2), Status = AttendanceStatus.Absent },
+                new AttendanceRecord {  CandidateId = 7, Candidate = new Candidate { FirstName = "James", LastName = "Martinez", Email = "james.martinez@example.com", PhoneNumber = "111-111-1111", CohortId = 3 }, Date = DateTime.Now.AddDays(-2), Status = AttendanceStatus.Late, CheckInTime = DateTime.Now.AddDays(-2).AddHours(10), CheckOutTime = DateTime.Now.AddDays(-2).AddHours(17) },
+                new AttendanceRecord {  CandidateId = 8, Candidate = new Candidate { FirstName = "Isabella", LastName = "Rodriguez", Email = "isabella.rodriguez@example.com", PhoneNumber = "000-000-0000", CohortId = 4 }, Date = DateTime.Now.AddDays(-2), Status = AttendanceStatus.Early, CheckInTime = DateTime.Now.AddDays(-2).AddHours(9), CheckOutTime = DateTime.Now.AddDays(-2).AddHours(17) },
+                new AttendanceRecord {  CandidateId = 9, Candidate = new Candidate { FirstName = "Lucas", LastName = "Wilson", Email = "lucas.wilson@example.com", PhoneNumber = "123-123-1234", CohortId = 1 }, Date = DateTime.Now.AddDays(-2), Status = AttendanceStatus.Early, CheckInTime = DateTime.Now.AddDays(-2).AddHours(9), CheckOutTime = DateTime.Now.AddDays(-2).AddHours(17) },
+                new AttendanceRecord {  CandidateId = 10, Candidate = new Candidate { FirstName = "Sophia", LastName = "Anderson", Email = "sophia.anderson@example.com", PhoneNumber = "321-321-4321", CohortId = 2 }, Date = DateTime.Now.AddDays(-2), Status = AttendanceStatus.Absent },
+                new AttendanceRecord {  CandidateId = 11, Candidate = new Candidate { FirstName = "Mason", LastName = "Thomas", Email = "mason.thomas@example.com", PhoneNumber = "456-456-6543", CohortId = 3 }, Date = DateTime.Now.AddDays(-2), Status = AttendanceStatus.Late, CheckInTime = DateTime.Now.AddDays(-2).AddHours(10), CheckOutTime = DateTime.Now.AddDays(-2).AddHours(17) },
+                new AttendanceRecord {  CandidateId = 12, Candidate = new Candidate { FirstName = "Mia", LastName = "Taylor", Email = "mia.taylor@example.com", PhoneNumber = "654-654-3456", CohortId = 4 }, Date = DateTime.Now.AddDays(-2), Status = AttendanceStatus.Early, CheckInTime = DateTime.Now.AddDays(-2).AddHours(9), CheckOutTime = DateTime.Now.AddDays(-2).AddHours(17) },
+                new AttendanceRecord {  CandidateId = 13, Candidate = new Candidate { FirstName = "Ethan", LastName = "Hernandez", Email = "ethan.hernandez@example.com", PhoneNumber = "789-789-9876", CohortId = 1 }, Date = DateTime.Now.AddDays(-2), Status = AttendanceStatus.Early, CheckInTime = DateTime.Now.AddDays(-2).AddHours(9), CheckOutTime = DateTime.Now.AddDays(-2).AddHours(17) },
+                new AttendanceRecord {  CandidateId = 14, Candidate = new Candidate { FirstName = "Amelia", LastName = "Moore", Email = "amelia.moore@example.com", PhoneNumber = "987-987-6789", CohortId = 2 }, Date = DateTime.Now.AddDays(-2), Status = AttendanceStatus.Absent },
+                new AttendanceRecord {  CandidateId = 15, Candidate = new Candidate { FirstName = "Logan", LastName = "Martin", Email = "logan.martin@example.com", PhoneNumber = "234-234-5678", CohortId = 3 }, Date = DateTime.Now.AddDays(-2), Status = AttendanceStatus.Late, CheckInTime = DateTime.Now.AddDays(-2).AddHours(10), CheckOutTime = DateTime.Now.AddDays(-2).AddHours(17) },
+                new AttendanceRecord {  CandidateId = 16, Candidate = new Candidate { FirstName = "Harper", LastName = "Jackson", Email = "harper.jackson@example.com", PhoneNumber = "876-876-1234", CohortId = 4 }, Date = DateTime.Now.AddDays(-2), Status = AttendanceStatus.Early, CheckInTime = DateTime.Now.AddDays(-2).AddHours(9), CheckOutTime = DateTime.Now.AddDays(-2).AddHours(17) },
+                new AttendanceRecord {  CandidateId = 17, Candidate = new Candidate { FirstName = "Elijah", LastName = "Thompson", Email = "elijah.thompson@example.com", PhoneNumber = "345-345-2345", CohortId = 1 }, Date = DateTime.Now.AddDays(-2), Status = AttendanceStatus.Early, CheckInTime = DateTime.Now.AddDays(-2).AddHours(9), CheckOutTime = DateTime.Now.AddDays(-2).AddHours(17) },
+                new AttendanceRecord {  CandidateId = 18, Candidate = new Candidate { FirstName = "Evelyn", LastName = "White", Email = "evelyn.white@example.com", PhoneNumber = "543-543-3456", CohortId = 2 }, Date = DateTime.Now.AddDays(-2), Status = AttendanceStatus.Absent },
+                new AttendanceRecord {  CandidateId = 19, Candidate = new Candidate { FirstName = "Alexander", LastName = "Lopez", Email = "alexander.lopez@example.com", PhoneNumber = "678-678-4567", CohortId = 3 }, Date = DateTime.Now.AddDays(-2), Status = AttendanceStatus.Late, CheckInTime = DateTime.Now.AddDays(-2).AddHours(10), CheckOutTime = DateTime.Now.AddDays(-2).AddHours(17) },
+                new AttendanceRecord {  CandidateId = 20, Candidate = new Candidate { FirstName = "Abigail", LastName = "Lee", Email = "abigail.lee@example.com", PhoneNumber = "876-876-5678", CohortId = 4 }, Date = DateTime.Now.AddDays(-2), Status = AttendanceStatus.Early, CheckInTime = DateTime.Now.AddDays(-2).AddHours(9), CheckOutTime = DateTime.Now.AddDays(-2).AddHours(17) },
+                new AttendanceRecord {  CandidateId = 21, Candidate = new Candidate { FirstName = "Henry", LastName = "Gonzalez", Email = "henry.gonzalez@example.com", PhoneNumber = "789-789-6789", CohortId = 1 }, Date = DateTime.Now.AddDays(-2), Status = AttendanceStatus.Early, CheckInTime = DateTime.Now.AddDays(-2).AddHours(9), CheckOutTime = DateTime.Now.AddDays(-2).AddHours(17) },
+                new AttendanceRecord {  CandidateId = 22, Candidate = new Candidate { FirstName = "Ella", LastName = "Harris", Email = "ella.harris@example.com", PhoneNumber = "987-987-7890", CohortId = 2 }, Date = DateTime.Now.AddDays(-2), Status = AttendanceStatus.Absent },
+                new AttendanceRecord {  CandidateId = 23, Candidate = new Candidate { FirstName = "Sebastian", LastName = "Clark", Email = "sebastian.clark@example.com", PhoneNumber = "345-345-8901", CohortId = 3 }, Date = DateTime.Now.AddDays(-2), Status = AttendanceStatus.Late, CheckInTime = DateTime.Now.AddDays(-2).AddHours(10), CheckOutTime = DateTime.Now.AddDays(-2).AddHours(17) },
+                new AttendanceRecord {  CandidateId = 24, Candidate = new Candidate { FirstName = "Grace", LastName = "Lewis", Email = "grace.lewis@example.com", PhoneNumber = "567-567-1234", CohortId = 4 }, Date = DateTime.Now.AddDays(-2), Status = AttendanceStatus.Early, CheckInTime = DateTime.Now.AddDays(-2).AddHours(9), CheckOutTime = DateTime.Now.AddDays(-2).AddHours(17) },
+                // Add more records as needed
+            };
+            context.AttendanceRecords.AddRange(attendanceRecords);
             // foreach (var candidate in candidates)
             // {
             //     context.Candidates.Add(candidate);
             // }
-
             context.SaveChanges();
         } 
     }
