@@ -8,6 +8,7 @@ using API.Repository.CohortRepo;
 using API.Repository.TrainingProgramRepo;
 using API.Services;
 using API.Services.AttendanceRecordService;
+using API.Services.CandidateAuthService;
 using API.Services.CohortService;
 using API.Services.Implementations;
 using API.Services.TrainingProgramService;
@@ -84,6 +85,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .GetBytes(builder.Configuration["JWTSettings:TokenKey"]))
         };
     });
+
+// builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<ICandidateAuthService, CandidateAuthService>();
 builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<TokenService>();

@@ -47,5 +47,30 @@ namespace API.Services
 
             return new JwtSecurityTokenHandler().WriteToken(tokenOptions);
         }
+
+
+
+        public string GenerateCandidateToken(Candidate candidate)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Email, candidate.Email),
+                new Claim(ClaimTypes.Name, candidate.FirstName + " " + candidate.LastName)
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWTSettings:TokenKey"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512);
+
+            var tokenOptions = new JwtSecurityToken
+            (
+                issuer: null,
+                audience: null,
+                claims: claims,
+                expires: DateTime.Now.AddDays(7),
+                signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(tokenOptions);
+        }
     }
 }

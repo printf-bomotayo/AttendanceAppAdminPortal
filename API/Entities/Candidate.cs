@@ -11,8 +11,11 @@ namespace API.Entities
         public string StaffId { get; set; }
         public string Department { get; set; }
         public int CohortId { get; set; }
+        public byte[] PasswordHash { get; set; }
+        public byte[] PasswordSalt { get; set; }
         public List<AttendanceRecord> AttendanceRecords { get; set; } = new();
         public List<Notification> Notifications { get; set; } = new();
+
     }
 
 
