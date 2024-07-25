@@ -12,6 +12,24 @@ namespace API.Controllers
             _trainingProgramService = trainingProgramService;
 
         }
+        
+        [HttpPost("{trainingProgramId}/cohorts")]
+        public async Task<IActionResult> AddCohortToTrainingProgram(int trainingProgramId, [FromBody] Cohort cohort)
+        {
+            try
+            {
+                await _trainingProgramService.AddCohortToTrainingProgramAsync(trainingProgramId, cohort);
+                return Ok();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound("Training Program not found");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<TrainingProgram>> GetById(int id)

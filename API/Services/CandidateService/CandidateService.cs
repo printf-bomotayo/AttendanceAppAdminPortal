@@ -48,5 +48,20 @@ namespace API.Services.Implementations
         {
             return await _candidateRepository.GetCandidatesAsync();
         }
+
+        public async Task AddAsync(Candidate candidate)
+        {
+            await _candidateRepository.AddAsync(candidate);
+        }
+
+        public async Task UpdateAsync(Candidate candidate)
+        {
+            await _candidateRepository.UpdateAsync(candidate);
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+           await _candidateRepository.DeleteAsync(id);
+        }
     }
 }

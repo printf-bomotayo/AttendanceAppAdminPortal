@@ -14,7 +14,7 @@ namespace API.Entities
          public string Location { get; set; }
         public int Duration { get; set; }
         public UnitOfDuration DurationUnit { get; set; }
-        public List<Cohort> CohortList { get; set; } = new();
+        public List<Cohort> CohortList { get; set; } 
     }
 
     public enum UnitOfDuration

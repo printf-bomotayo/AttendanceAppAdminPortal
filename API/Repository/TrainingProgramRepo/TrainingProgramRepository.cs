@@ -46,5 +46,18 @@ namespace API.Repository.TrainingProgramRepo
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<TrainingProgram> GetTrainingProgramByIdAsync(int id)
+        {
+            return await _context.TrainingPrograms
+                                .Include(tp => tp.CohortList)
+                                .FirstOrDefaultAsync(tp => tp.Id == id);
+        }
+
+        public async Task UpdateTrainingProgramAsync(TrainingProgram trainingProgram)
+        {
+            _context.TrainingPrograms.Update(trainingProgram);
+            await _context.SaveChangesAsync();
+        }
     }
 }

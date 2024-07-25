@@ -25,7 +25,7 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AttendanceRecord>>> GetAll()
+        public async Task<ActionResult<List<AttendanceRecord>>> GetAll()
         {
             var attendanceRecords = await _attendanceRecordService.GetAllAsync();
             return Ok(attendanceRecords);

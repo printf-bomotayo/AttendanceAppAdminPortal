@@ -9,5 +9,8 @@ namespace API.Services.CohortService
         Task AddAsync(Cohort cohort);
         Task UpdateAsync(Cohort cohort);
         Task DeleteAsync(int id);
+        Task<Cohort> GetCohortByIdAsync(int id);
+        Task AddCandidateToCohortAsync(int cohortId, Candidate candidate);
+
     }
 }

@@ -15,5 +15,8 @@ namespace API.Repository.CandidateRepo
         Task<List<Candidate>> GetCandidatesByGenderAsync(string gender);
         Task<List<Candidate>> GetCandidatesByNameAsync(string name);
         Task<List<Candidate>> GetCandidatesByCohortAsync(int cohortId);
+        Task AddAsync(Candidate candidate);
+        Task UpdateAsync(Candidate candidate);
+        Task DeleteAsync(int id);
     }
 }

@@ -16,6 +16,20 @@ namespace API.Repository.CohortRepo
             _context = context;
 
         }
+
+        public async Task<Cohort> GetCohortByIdAsync(int id)
+        {
+            return await _context.Cohorts
+                                .Include(c => c.CandidatesList)
+                                .FirstOrDefaultAsync(c => c.Id == id);
+        }
+
+        public async Task UpdateCohortAsync(Cohort cohort)
+        {
+            _context.Cohorts.Update(cohort);
+            await _context.SaveChangesAsync();
+        }
+        
         public async Task<Cohort> GetByIdAsync(int id)
         {
             return await _context.Cohorts.Include(c => c.CandidatesList).FirstOrDefaultAsync(c => c.Id == id);

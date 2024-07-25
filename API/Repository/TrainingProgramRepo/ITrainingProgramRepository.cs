@@ -13,5 +13,7 @@ namespace API.Repository.TrainingProgramRepo
         Task AddAsync(TrainingProgram trainingProgram);
         Task UpdateAsync(TrainingProgram trainingProgram);
         Task DeleteAsync(int id);
+        Task<TrainingProgram> GetTrainingProgramByIdAsync(int id);
+        Task UpdateTrainingProgramAsync(TrainingProgram trainingProgram);
     }
 }

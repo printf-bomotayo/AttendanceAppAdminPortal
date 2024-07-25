@@ -2,10 +2,13 @@ using System.Text;
 using API.Data;
 using API.Entities;
 using API.Middleware;
+using API.Repository.AttendanceRecordRepo;
 using API.Repository.CandidateRepo;
 using API.Repository.CohortRepo;
 using API.Repository.TrainingProgramRepo;
 using API.Services;
+using API.Services.AttendanceRecordService;
+using API.Services.CohortService;
 using API.Services.Implementations;
 using API.Services.TrainingProgramService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -18,7 +21,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+        .AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+            options.JsonSerializerOptions.MaxDepth = 64; // You can adjust the depth limit as needed.
+        });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -84,10 +92,13 @@ builder.Services.AddScoped<ICandidateRepository, CandidateRepository>();
 builder.Services.AddScoped<ICandidateService, CandidateService>();
 
 builder.Services.AddScoped<ICohortRepository, CohortRepository>();
-builder.Services.AddScoped<ICohortRepository, CohortRepository>();
+builder.Services.AddScoped<ICohortService, CohortService>();
 
 builder.Services.AddScoped<ITrainingProgramRepository, TrainingProgramRepository>();
 builder.Services.AddScoped<ITrainingProgramService, TrainingProgramService>();
+
+builder.Services.AddScoped<IAttendanceRecordRepository, AttendanceRecordRepository>();
+builder.Services.AddScoped<IAttendanceRecordService, AttendanceRecordService>();
 
 var app = builder.Build();
 

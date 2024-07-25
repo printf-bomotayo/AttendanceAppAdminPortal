@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Repository.AttendanceRecordRepo
@@ -28,8 +29,21 @@ namespace API.Repository.AttendanceRecordRepo
 
         public async Task AddAsync(AttendanceRecord attendanceRecord)
         {
-            await _context.AttendanceRecords.AddAsync(attendanceRecord);
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.AttendanceRecords.AddAsync(attendanceRecord);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                // Log the detailed error message
+                var sqlException = ex.GetBaseException() as SqliteException;
+                if (sqlException != null)
+                {
+                    Console.WriteLine($"SQLite Error {sqlException.SqliteErrorCode}: {sqlException.Message}");
+                }
+                throw;
+            }
         }
 
         public async Task UpdateAsync(AttendanceRecord attendanceRecord)

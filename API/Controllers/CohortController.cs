@@ -56,5 +56,23 @@ namespace API.Controllers
             await _cohortService.DeleteAsync(id);
             return NoContent();
         }
+
+        [HttpPost("{cohortId}/candidates")]
+        public async Task<IActionResult> AddCandidateToCohort(int cohortId, [FromBody] Candidate candidate)
+        {
+            try
+            {
+                await _cohortService.AddCandidateToCohortAsync(cohortId, candidate);
+                return Ok();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound("Cohort not found");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }

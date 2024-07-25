@@ -15,7 +15,7 @@ namespace API.Entities
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public ActivityStatus Status { get; set; }
-        public List<Candidate> CandidatesList { get; set; } = new();
+        public List<Candidate> CandidatesList { get; set; }
         public int TrainingProgramId { get; set; }
         public TrainingProgram TrainingProgram { get; set; }
         // Administrative Details

@@ -3,6 +3,7 @@ using System;
 using API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240723092056_AdditionalEntities")]
+    partial class AdditionalEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.7");
@@ -60,6 +63,9 @@ namespace API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("CandidateGender")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("CohortId")
                         .HasColumnType("INTEGER");
 
@@ -71,9 +77,6 @@ namespace API.Migrations
 
                     b.Property<string>("FirstName")
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("Gender")
-                        .HasColumnType("INTEGER");
 
                     b.Property<string>("LastName")
                         .HasColumnType("TEXT");
@@ -255,13 +258,13 @@ namespace API.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "bdd87c02-487d-4760-9fb4-a938ecbdf3a7",
+                            Id = "a94d842c-8428-47aa-90c2-d3cae7afbd43",
                             Name = "Member",
                             NormalizedName = "MEMBER"
                         },
                         new
                         {
-                            Id = "f1eb1b37-3fc8-4ea5-8870-5ce05c59427e",
+                            Id = "204fdfcb-ac86-48a9-8d80-e5d5d889b378",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         });

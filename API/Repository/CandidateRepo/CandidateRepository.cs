@@ -38,7 +38,7 @@ namespace API.Repository.CandidateRepo
 
         public async Task<List<Candidate>> GetCandidatesByGenderAsync(string gender)
         {
-            return await _context.Candidates.Where(c => c.CandidateGender.ToString() == gender).ToListAsync();
+            return await _context.Candidates.Where(c => c.Gender.ToString() == gender).ToListAsync();
         }
 
         public async Task<List<Candidate>> GetCandidatesByNameAsync(string name)
@@ -49,6 +49,28 @@ namespace API.Repository.CandidateRepo
         public async Task<List<Candidate>> GetCandidatesAsync()
         {
             return await _context.Candidates.ToListAsync();
+        }
+
+        public async Task AddAsync(Candidate candidate)
+        {
+            await _context.Candidates.AddAsync(candidate);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateAsync(Candidate candidate)
+        {
+            _context.Candidates.Update(candidate);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var candidate = await _context.Candidates.FirstOrDefaultAsync(c => c.Id == id);
+            if (candidate != null)
+            {
+                _context.Candidates.Remove(candidate);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }
