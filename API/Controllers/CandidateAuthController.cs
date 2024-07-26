@@ -46,5 +46,20 @@ namespace API.Controllers
                 return Unauthorized(ex.Message);
             }
         }
+
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword(CandidatePasswordResetDto resetDto)
+        {
+            try
+            {
+                await _candidateAuthService.ResetPassword(resetDto);
+                return Ok("Password reset successful");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

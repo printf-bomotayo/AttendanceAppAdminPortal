@@ -65,5 +65,22 @@ namespace API.Services.CandidateAuthService
 
             return _tokenService.GenerateCandidateToken(candidate);
         }
+
+
+
+        public async Task ResetPassword(CandidatePasswordResetDto resetDto)
+        {
+            var candidate = await _context.Candidates
+                .SingleOrDefaultAsync(c => c.Email == resetDto.Email);
+
+            if (candidate == null) throw new Exception("Candidate not found");
+
+            using var hmac = new HMACSHA512();
+            candidate.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(resetDto.NewPassword));
+            candidate.PasswordSalt = hmac.Key;
+
+            _context.Candidates.Update(candidate);
+            await _context.SaveChangesAsync();
+        }
     }
 }
