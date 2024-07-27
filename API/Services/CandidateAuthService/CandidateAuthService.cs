@@ -7,8 +7,10 @@ using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
 using API.Entities;
+using API.Services.EmailService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace API.Services.CandidateAuthService
 {
@@ -16,8 +18,11 @@ namespace API.Services.CandidateAuthService
     {
         private readonly AppDbContext _context;
         private readonly TokenService _tokenService;
-        public CandidateAuthService(AppDbContext context, TokenService tokenService)
+        private readonly IDistributedCache _cache;
+        private readonly IEmailService _emailService;
+        public CandidateAuthService(AppDbContext context, TokenService tokenService, IEmailService emailService)
         {
+            _emailService = emailService;
             _tokenService = tokenService;
             _context = context;
         }
@@ -68,7 +73,7 @@ namespace API.Services.CandidateAuthService
 
 
 
-        public async Task ResetPassword(CandidatePasswordResetDto resetDto)
+        public async Task ResetPasswordAsync(CandidatePasswordResetDto resetDto)
         {
             var candidate = await _context.Candidates
                 .SingleOrDefaultAsync(c => c.Email == resetDto.Email);
@@ -80,6 +85,38 @@ namespace API.Services.CandidateAuthService
             candidate.PasswordSalt = hmac.Key;
 
             _context.Candidates.Update(candidate);
+            await _context.SaveChangesAsync();
+        }
+
+
+        public async Task GenerateVerificationCodeAsync(string email)
+        {
+            var candidate = await _context.Candidates.SingleOrDefaultAsync(c => c.Email == email);
+            if (candidate == null) throw new Exception("Candidate not found.");
+
+            var verificationCode = new Random().Next(100000, 999999).ToString();
+            candidate.VerificationCode = verificationCode;
+            candidate.VerificationCodeExpiry = DateTime.UtcNow.AddMinutes(10);
+
+            await _context.SaveChangesAsync();
+
+            await _emailService.SendEmailAsync(candidate.Email, "Password Reset Verification Code", $"Your verification code is {verificationCode}");
+        }
+
+        public async Task VerifyCodeAsync(string email, string verificationCode)
+        {
+            var candidate = await _context.Candidates.SingleOrDefaultAsync(c => c.Email == email);
+            if (candidate == null) throw new Exception("Candidate not found.");
+
+            if (candidate.VerificationCode != verificationCode || candidate.VerificationCodeExpiry < DateTime.UtcNow)
+            {
+                throw new Exception("Invalid or expired verification code.");
+            }
+
+            // Reset verification code after successful verification
+            candidate.VerificationCode = null;
+            candidate.VerificationCodeExpiry = DateTime.MinValue;
+
             await _context.SaveChangesAsync();
         }
     }

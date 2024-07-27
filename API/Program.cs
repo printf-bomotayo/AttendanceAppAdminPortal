@@ -10,6 +10,7 @@ using API.Services;
 using API.Services.AttendanceRecordService;
 using API.Services.CandidateAuthService;
 using API.Services.CohortService;
+using API.Services.EmailService;
 using API.Services.Implementations;
 using API.Services.TrainingProgramService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -40,7 +41,7 @@ builder.Services.AddSwaggerGen(c =>
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
         Scheme = JwtBearerDefaults.AuthenticationScheme,
-        Description = "Put Bearer + your token in teh box below",
+        Description = "Put Bearer + your token in the box below",
         Reference = new OpenApiReference
         {
             Id = JwtBearerDefaults.AuthenticationScheme,
@@ -59,18 +60,33 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // Add and Configure Database context service
-builder.Services.AddDbContext<AppDbContext>(
-    opt => 
-    {
-        opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
-    });
 
-builder.Services.AddIdentityCore<User>(opt => 
+// builder.Services.AddDbContext<AppDbContext>(
+//     opt => 
+//     {
+//         opt.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),    new MySqlServerVersion(new Version(8, 0, 21)));
+//         // opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
+//     });
+
+builder.Services.AddDbContext<AppDbContext>(opt =>
+    opt.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"), 
+    new MySqlServerVersion(new Version(8, 0, 21))));
+
+
+builder.Services.AddIdentity<User, IdentityRole>(opt => 
 {
     opt.User.RequireUniqueEmail = true;
 })
-    .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<AppDbContext>();
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders();
+
+
+// builder.Services.AddIdentityCore<User>(opt => 
+// {
+//     opt.User.RequireUniqueEmail = true;
+// })
+//     .AddRoles<IdentityRole>()
+//     .AddEntityFrameworkStores<AppDbContext>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(opt =>
@@ -103,6 +119,16 @@ builder.Services.AddScoped<ITrainingProgramService, TrainingProgramService>();
 
 builder.Services.AddScoped<IAttendanceRecordRepository, AttendanceRecordRepository>();
 builder.Services.AddScoped<IAttendanceRecordService, AttendanceRecordService>();
+
+builder.Services.AddScoped<IEmailService, EmailService>();
+
+
+// Configure redis cahing service
+// builder.Services.AddStackExchangeRedisCache(options =>
+// {
+//     options.Configuration = builder.Configuration.GetConnectionString("RedisConnection");
+// });
+
 
 var app = builder.Build();
 

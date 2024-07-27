@@ -4,8 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
-using Microsoft.Data.Sqlite;
+// using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 
 namespace API.Repository.AttendanceRecordRepo
 {
@@ -34,16 +35,27 @@ namespace API.Repository.AttendanceRecordRepo
                 await _context.AttendanceRecords.AddAsync(attendanceRecord);
                 await _context.SaveChangesAsync();
             }
+            // catch (DbUpdateException ex)
+            // {
+            //     // Log the detailed error message
+            //     var sqlException = ex.GetBaseException() as SqliteException;
+            //     if (sqlException != null)
+            //     {
+            //         Console.WriteLine($"SQLite Error {sqlException.SqliteErrorCode}: {sqlException.Message}");
+            //     }
+            //     throw;
+            // }
+            
             catch (DbUpdateException ex)
+        {
+            // Log the detailed error message
+            var mySqlException = ex.GetBaseException() as MySqlException;
+            if (mySqlException != null)
             {
-                // Log the detailed error message
-                var sqlException = ex.GetBaseException() as SqliteException;
-                if (sqlException != null)
-                {
-                    Console.WriteLine($"SQLite Error {sqlException.SqliteErrorCode}: {sqlException.Message}");
-                }
-                throw;
+                Console.WriteLine($"MySQL Error {mySqlException.Number}: {mySqlException.Message}");
             }
+            throw;
+        }
         }
 
         public async Task UpdateAsync(AttendanceRecord attendanceRecord)

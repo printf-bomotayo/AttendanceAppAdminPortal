@@ -48,18 +48,40 @@ namespace API.Controllers
         }
 
 
-        [HttpPost("reset-password")]
-        public async Task<IActionResult> ResetPassword(CandidatePasswordResetDto resetDto)
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto dto)
         {
-            try
-            {
-                await _candidateAuthService.ResetPassword(resetDto);
-                return Ok("Password reset successful");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await _candidateAuthService.GenerateVerificationCodeAsync(dto.Email);
+            return Ok("Verification code sent to your email.");
         }
+
+        [HttpPost("verify-code")]
+        public async Task<IActionResult> VerifyCode([FromBody] VerifyCodeDto dto)
+        {
+            await _candidateAuthService.VerifyCodeAsync(dto.Email, dto.Code);
+            return Ok("Verification successful. You can now reset your password.");
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] CandidatePasswordResetDto dto)
+        {
+            await _candidateAuthService.ResetPasswordAsync(dto);
+            return Ok("Password reset successful.");
+        }
+
+
+        // [HttpPost("reset-password")]
+        // public async Task<IActionResult> ResetPassword(CandidatePasswordResetDto resetDto)
+        // {
+        //     try
+        //     {
+        //         await _candidateAuthService.ResetPassword(resetDto);
+        //         return Ok("Password reset successful");
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         return BadRequest(ex.Message);
+        //     }
+        // }
     }
 }

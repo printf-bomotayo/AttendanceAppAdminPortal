@@ -7,6 +7,9 @@ namespace API.Services.CandidateAuthService
     {
         Task<string> Signup(CandidateSignUpDto signupDto);
         Task<string> Login(CandidateLoginDto loginDto);
-        Task ResetPassword(CandidatePasswordResetDto resetDto);
+        Task ResetPasswordAsync(CandidatePasswordResetDto resetDto);
+        Task GenerateVerificationCodeAsync(string email);
+        Task VerifyCodeAsync(string email, string verificationCode);
+
     }
 }
