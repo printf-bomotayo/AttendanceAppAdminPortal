@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace API.DTOs
 {
-    public class CandidatePasswordResetDto
+    public class PasswordResetDto
     {
         public string Email { get; set; }
         public string NewPassword { get; set; }

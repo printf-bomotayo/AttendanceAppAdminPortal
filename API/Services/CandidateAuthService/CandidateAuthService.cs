@@ -17,15 +17,71 @@ namespace API.Services.CandidateAuthService
     public class CandidateAuthService : ICandidateAuthService
     {
         private readonly AppDbContext _context;
+
         private readonly TokenService _tokenService;
+
+#pragma warning disable CS0169 // The field 'CandidateAuthService._cache' is never used
+
         private readonly IDistributedCache _cache;
+
+#pragma warning restore CS0169 // The field 'CandidateAuthService._cache' is never used
+
         private readonly IEmailService _emailService;
-        public CandidateAuthService(AppDbContext context, TokenService tokenService, IEmailService emailService)
+
+        private readonly List<string> _validEmailDomains;
+
+        public CandidateAuthService(AppDbContext context, TokenService tokenService, IEmailService emailService, IConfiguration configuration)
         {
             _emailService = emailService;
             _tokenService = tokenService;
             _context = context;
+            _validEmailDomains = configuration.GetSection("ValidEmailDomains").Get<List<string>>();
         }
+
+        public bool IsValidEmailDomain(string email)
+        {
+            var emailDomain =  email.Split('@').Last();
+            return  _validEmailDomains.Contains(emailDomain);
+        }
+
+        public async Task<string> Signup(CandidateSignUpDto signupDto)
+        {
+
+            if (!IsValidEmailDomain(signupDto.Email))
+            {
+                throw new Exception("Invalid email domain.");
+            }
+
+            if (await _context.Candidates.AnyAsync(c => c.Email == signupDto.Email))
+            {
+                throw new Exception("Email is already registered.");
+            }
+
+            var candidate = new Candidate
+            {
+                FirstName = signupDto.FirstName,
+                LastName = signupDto.LastName,
+                Email = signupDto.Email,
+                CandidateGender = signupDto.CandidateGender,
+                PhoneNumber = signupDto.PhoneNumber,
+                StaffId = signupDto.StaffId,
+                Department = signupDto.Department,
+                CohortId = signupDto.CohortId
+            };
+
+            using var hmac = new HMACSHA512();
+            candidate.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(signupDto.Password));
+            candidate.PasswordSalt = hmac.Key;
+
+            _context.Candidates.Add(candidate);
+            await _context.SaveChangesAsync();
+
+            await _emailService.SendCandidateRegistrationConfirmationAsync(candidate.Email, candidate.FirstName);
+
+            return _tokenService.GenerateCandidateToken(candidate);
+        }
+
+
 
          public async Task<string> Login(CandidateLoginDto loginDto)
         {
@@ -42,38 +98,10 @@ namespace API.Services.CandidateAuthService
             return _tokenService.GenerateCandidateToken(candidate);
         }
 
-        public async Task<string> Signup(CandidateSignUpDto signupDto)
-        {
-            if (await _context.Candidates.AnyAsync(c => c.Email == signupDto.Email))
-            {
-                throw new Exception("Email is already registered.");
-            }
-
-            var candidate = new Candidate
-            {
-                FirstName = signupDto.FirstName,
-                LastName = signupDto.LastName,
-                Email = signupDto.Email,
-                Gender = Enum.Parse<Gender>(signupDto.Gender, true),
-                PhoneNumber = signupDto.PhoneNumber,
-                StaffId = signupDto.StaffId,
-                Department = signupDto.Department,
-                CohortId = signupDto.CohortId
-            };
-
-            using var hmac = new HMACSHA512();
-            candidate.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(signupDto.Password));
-            candidate.PasswordSalt = hmac.Key;
-
-            _context.Candidates.Add(candidate);
-            await _context.SaveChangesAsync();
-
-            return _tokenService.GenerateCandidateToken(candidate);
-        }
+        
 
 
-
-        public async Task ResetPasswordAsync(CandidatePasswordResetDto resetDto)
+        public async Task ResetPasswordAsync(PasswordResetDto resetDto)
         {
             var candidate = await _context.Candidates
                 .SingleOrDefaultAsync(c => c.Email == resetDto.Email);
@@ -81,10 +109,13 @@ namespace API.Services.CandidateAuthService
             if (candidate == null) throw new Exception("Candidate not found");
 
             using var hmac = new HMACSHA512();
+
             candidate.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(resetDto.NewPassword));
+
             candidate.PasswordSalt = hmac.Key;
 
             _context.Candidates.Update(candidate);
+
             await _context.SaveChangesAsync();
         }
 
@@ -92,20 +123,24 @@ namespace API.Services.CandidateAuthService
         public async Task GenerateVerificationCodeAsync(string email)
         {
             var candidate = await _context.Candidates.SingleOrDefaultAsync(c => c.Email == email);
+
             if (candidate == null) throw new Exception("Candidate not found.");
 
             var verificationCode = new Random().Next(100000, 999999).ToString();
+
             candidate.VerificationCode = verificationCode;
+
             candidate.VerificationCodeExpiry = DateTime.UtcNow.AddMinutes(10);
 
             await _context.SaveChangesAsync();
 
-            await _emailService.SendEmailAsync(candidate.Email, "Password Reset Verification Code", $"Your verification code is {verificationCode}");
+            await _emailService.SendEmailAsync(candidate.Email, "Password Reset Verification Code", $"Your verification code is {verificationCode}.");
         }
 
         public async Task VerifyCodeAsync(string email, string verificationCode)
         {
             var candidate = await _context.Candidates.SingleOrDefaultAsync(c => c.Email == email);
+
             if (candidate == null) throw new Exception("Candidate not found.");
 
             if (candidate.VerificationCode != verificationCode || candidate.VerificationCodeExpiry < DateTime.UtcNow)
@@ -115,6 +150,7 @@ namespace API.Services.CandidateAuthService
 
             // Reset verification code after successful verification
             candidate.VerificationCode = null;
+
             candidate.VerificationCodeExpiry = DateTime.MinValue;
 
             await _context.SaveChangesAsync();

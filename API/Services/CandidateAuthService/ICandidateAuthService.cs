@@ -7,9 +7,10 @@ namespace API.Services.CandidateAuthService
     {
         Task<string> Signup(CandidateSignUpDto signupDto);
         Task<string> Login(CandidateLoginDto loginDto);
-        Task ResetPasswordAsync(CandidatePasswordResetDto resetDto);
+        Task ResetPasswordAsync(PasswordResetDto resetDto);
         Task GenerateVerificationCodeAsync(string email);
         Task VerifyCodeAsync(string email, string verificationCode);
+        public bool IsValidEmailDomain(string email);
 
     }
 }

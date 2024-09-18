@@ -6,7 +6,7 @@ namespace API.Entities
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Email { get; set; }
-        public Gender Gender { get; set; }
+        public Gender CandidateGender { get; set; }
         public string PhoneNumber { get; set; }
         public string StaffId { get; set; }
         public List<CandidatesGroup> Groups { get; set; }
@@ -17,12 +17,16 @@ namespace API.Entities
         public List<AttendanceRecord> AttendanceRecords { get; set; } = new();
         public List<Notification> Notifications { get; set; } = new();
 
-         // Fields for password reset
+
+        // fields for candidate biometric data
+        public byte[] FingerprintData { get; set; }
+        public byte[] FaceRecognitionData { get; set; }
+
+        // Fields for password reset
         public string VerificationCode { get; set; }
         public DateTime VerificationCodeExpiry { get; set; }
 
     }
-
 
     public enum Gender
     {

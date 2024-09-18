@@ -16,6 +16,7 @@ using API.Services.TrainingProgramService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
@@ -69,9 +70,10 @@ builder.Services.AddSwaggerGen(c =>
 //     });
 
 builder.Services.AddDbContext<AppDbContext>(opt =>
-    opt.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"), 
-    new MySqlServerVersion(new Version(8, 0, 21))));
-
+    {
+        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+        opt.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+    });
 
 builder.Services.AddIdentity<User, IdentityRole>(opt => 
 {
@@ -122,6 +124,12 @@ builder.Services.AddScoped<IAttendanceRecordService, AttendanceRecordService>();
 
 builder.Services.AddScoped<IEmailService, EmailService>();
 
+builder.Services.Configure<EmailSmtpSettings>(builder.Configuration.GetSection("EmailSmtpSettings"));
+
+builder.Services.Configure<List<string>>(builder.Configuration.GetSection("ValidEmailDomains"));
+
+builder.Services.AddAWSLambdaHosting(LambdaEventSource.HttpApi);
+
 
 // Configure redis cahing service
 // builder.Services.AddStackExchangeRedisCache(options =>
@@ -141,14 +149,24 @@ app.UseCors(opt =>
     opt.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("http://localhost:3000");
 });
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.ConfigObject.AdditionalItems.Add("persistAuthorization", "true");
-    });
-}
+// if (app.Environment.IsDevelopment())
+// {
+//     app.UseSwagger();
+//     app.UseSwaggerUI(c =>
+//     {
+//         c.ConfigObject.AdditionalItems.Add("persistAuthorization", "true");
+//     });
+// }
+
+
+// Allow swagger for both development and production environment
+app.UseSwagger();
+app.UseSwaggerUI();
+// app.UseSwaggerUI(c =>
+// {
+//     c.ConfigObject.AdditionalItems.Add("persistAuthorization", "true");
+// });
+
 
 // app.UseHttpsRedirection();
 app.UseAuthentication();
