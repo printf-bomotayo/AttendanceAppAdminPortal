@@ -8,6 +8,8 @@ namespace API.Services.EmailService
     public interface IEmailService
     {
         Task SendEmailAsync(string to, string subject, string body);
+
+        Task SendCandidateRegistrationConfirmationAsync(string email, string firstName);
     }
     
 }

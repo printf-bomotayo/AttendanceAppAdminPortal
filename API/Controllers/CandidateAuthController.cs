@@ -22,6 +22,11 @@ namespace API.Controllers
         [HttpPost("signup")]
         public async Task<IActionResult> Signup(CandidateSignUpDto signupDto)
         {
+            if (!_candidateAuthService.IsValidEmailDomain(signupDto.Email))
+            {
+                return BadRequest("Invalid email.");
+            }
+            
             try
             {
                 var token = await _candidateAuthService.Signup(signupDto);
@@ -63,10 +68,18 @@ namespace API.Controllers
         }
 
         [HttpPost("reset-password")]
-        public async Task<IActionResult> ResetPassword([FromBody] CandidatePasswordResetDto dto)
+        public async Task<IActionResult> ResetPassword([FromBody] PasswordResetDto dto)
         {
-            await _candidateAuthService.ResetPasswordAsync(dto);
-            return Ok("Password reset successful.");
+            try
+            {
+                await _candidateAuthService.ResetPasswordAsync(dto);
+                return Ok("Password reset successful.");
+            }
+            catch (Exception ex)
+            {
+                 return BadRequest(ex.Message);
+            }
+            
         }
 
 

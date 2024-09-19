@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 
 namespace API.DTOs
 {
-    public class VerifyCodeDto
+    public class PasswordResetDto
     {
         public string Email { get; set; }
-        public string Code { get; set; }
+        public string NewPassword { get; set; }
 
-	}
+    }
 }
