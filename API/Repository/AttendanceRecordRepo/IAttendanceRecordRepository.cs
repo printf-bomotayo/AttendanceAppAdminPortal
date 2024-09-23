@@ -22,6 +22,7 @@ namespace API.Repository.AttendanceRecordRepo
         Task<List<AttendanceRecordResponseDto>> GetAttendanceRecordsByDateRangeAsync(int candidateId, DateTime startDate, DateTime endDate);
 
         Task<CandidateAttendanceSummaryDto> GetCandidateAttendanceSummaryAsync(int candidateId, int cohortId);
+        Task<List<CandidateAttendanceSummaryDto>> GetAllCandidateAttendanceSummariesAsync(int cohortId);
 
         Task UpdateAsync(AttendanceRecord attendanceRecord);
 

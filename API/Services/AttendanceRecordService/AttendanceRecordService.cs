@@ -37,6 +37,16 @@ namespace API.Services.AttendanceRecordService
             return await _attendanceRecordRepository.GetAttendanceRecordsByDateRangeAsync(candidateId, startDate, endDate);
         }
 
+        public async Task<CandidateAttendanceSummaryDto> GetCandidateAttendanceSummaryAsync(int candidateId, int cohortId)
+        {
+            return await _attendanceRecordRepository.GetCandidateAttendanceSummaryAsync(candidateId, cohortId);
+        }
+
+        public async Task<List<CandidateAttendanceSummaryDto>> GetAllCandidateAttendanceSummariesAsync(int cohortId)
+        {
+            return await _attendanceRecordRepository.GetAllCandidateAttendanceSummariesAsync(cohortId);
+        }
+
         public async Task AddAsync(AttendanceRecord attendanceRecord)
         {
             await _attendanceRecordRepository.AddAsync(attendanceRecord);

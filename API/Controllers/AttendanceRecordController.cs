@@ -209,6 +209,32 @@ namespace API.Controllers
 			return Ok(attendanceRecordDtos);
 		}
 
+        [HttpGet("candidates/{candidateId}/attendance-summary")]
+        public async Task<ActionResult<CandidateAttendanceSummaryDto>> GetCandidateAttendanceSummary(int candidateId, int cohortId)
+        {
+            var summary = await _attendanceRecordService.GetCandidateAttendanceSummaryAsync(candidateId, cohortId);
+
+            if (summary == null) return NotFound();
+
+            return Ok(summary);
+        }
+
+
+        [HttpGet("candidates/attendance-summary/{cohortId}")]
+        public async Task<IActionResult> GetCandidateAttendanceSummaries(int cohortId)
+        {
+            try
+            {
+                var summaries = await _attendanceRecordService.GetAllCandidateAttendanceSummariesAsync(cohortId);
+                return Ok(summaries);
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions appropriately
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing the request.");
+            }
+        }
+
 
         [HttpGet("candidates/{candidateId}/attendance")]
         public async Task<ActionResult<List<AttendanceRecordResponseDto>>> GetAttendanceRecordsByDateRange(int candidateId, DateTime startDate, DateTime endDate)

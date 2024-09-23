@@ -14,6 +14,8 @@ namespace API.Services.AttendanceRecordService
         Task<IEnumerable<AttendanceRecord>> GetByCandidateIdAsync(int candidateId);
         Task<List<AttendanceRecordResponseDto>> FilterAttendanceRecordsAsync(string? name, string? email, string? staffId);
         Task<List<AttendanceRecordResponseDto>> GetAttendanceRecordsByDateRangeAsync(int candidateId, DateTime startDate, DateTime endDate);
+        Task<CandidateAttendanceSummaryDto> GetCandidateAttendanceSummaryAsync(int candidateId, int cohortId);
+        Task<List<CandidateAttendanceSummaryDto>> GetAllCandidateAttendanceSummariesAsync(int cohortId);
         Task AddAsync(AttendanceRecord attendanceRecord);
         Task UpdateAsync(AttendanceRecord attendanceRecord);
         Task DeleteAsync(int id);

@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
 using API.Entities;
+using API.Services;
+
 // using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
@@ -14,9 +16,11 @@ namespace API.Repository.AttendanceRecordRepo
     public class AttendanceRecordRepository : IAttendanceRecordRepository
     {
         private readonly AppDbContext _context;
-        public AttendanceRecordRepository(AppDbContext context)
+        private readonly ICandidateService _candidateService;
+        public AttendanceRecordRepository(AppDbContext context, ICandidateService candidateService)
         {
             _context = context;
+            _candidateService = candidateService;
         }
 
         public async Task<AttendanceRecord> GetByIdAsync(int id)
@@ -157,8 +161,8 @@ namespace API.Repository.AttendanceRecordRepo
 
         public async Task<CandidateAttendanceSummaryDto> GetCandidateAttendanceSummaryAsync(int candidateId, int cohortId)
         {
-            var totalDaysInProgram = await _attendanceRecordRepository.GetTotalDaysForCohort(cohortId);
-            var totalPresentDays = await _attendanceRecordService.GetTotalDaysPresentForCandidate(candidateId, cohortId);
+            var totalDaysInProgram = await GetTotalDaysForCohort(cohortId);
+            var totalPresentDays = await GetTotalDaysPresentForCandidate(candidateId, cohortId);
 
             var candidate = await _candidateService.GetCandidateByIdAsync(candidateId);
 
@@ -169,26 +173,69 @@ namespace API.Repository.AttendanceRecordRepo
                 CandidateEmail = candidate.Email,
                 StaffId = candidate.StaffId,
                 TotalAppearances = totalPresentDays,
-                PercentageAppearances = (totalPresentDays / (double)totalDaysInProgram) * 100
+                AttendancePercentage = (totalPresentDays / (double)totalDaysInProgram) * 100
             };
         }
 
 
-        private async Task<int> GetTotalDaysForCohort(int cohortId)
+
+        public async Task<List<CandidateAttendanceSummaryDto>> GetAllCandidateAttendanceSummariesAsync(int cohortId)
         {
-            // Logic to calculate the total days for the given cohort (training program duration)
-            return await _context.AttendanceRecords.Where(r => r.CohortId == cohortId).Select(r => r.Date).Distinct().CountAsync();
+            var candidates = await _context.Candidates
+                .Where(c => c.CohortId == cohortId)
+                .ToListAsync();
+
+            var totalDaysForCohort = await GetTotalDaysForCohort(cohortId);
+
+            var candidateSummaries = new List<CandidateAttendanceSummaryDto>();
+
+            foreach (var candidate in candidates)
+            {
+                var totalDaysPresent = await GetTotalDaysPresentForCandidate(candidate.Id, cohortId);
+
+                var percentageAppearance = totalDaysForCohort > 0
+                    ? (double)totalDaysPresent / totalDaysForCohort * 100
+                    : 0;
+
+                var summaryDto = new CandidateAttendanceSummaryDto
+                {
+                    CandidateId = candidate.Id,
+                    CandidateName = $"{candidate.FirstName} {candidate.LastName}",
+                    StaffId = candidate.StaffId,
+                    CandidateEmail = candidate.Email,
+                    TotalAppearances = totalDaysPresent,
+                    AttendancePercentage = percentageAppearance
+                };
+
+                candidateSummaries.Add(summaryDto);
+            }
+
+            return candidateSummaries;
         }
 
-        private async Task<int> GetTotalDaysPresentForCandidate(int candidateId, int cohortId)
+
+
+        public async Task<int> GetTotalDaysForCohort(int cohortId)
+        {
+            // Logic to calculate the total days for a given cohort (training program duration)
+            return await _context.AttendanceRecords
+                .Where(r => r.Candidate.CohortId == cohortId)  // Joining AttendanceRecords with Candidate to filter by cohortId
+                .Select(r => r.Date)
+                .Distinct()
+                .CountAsync();
+        }
+
+
+        public async Task<int> GetTotalDaysPresentForCandidate(int candidateId, int cohortId)
         {
             // Logic to calculate the total days the candidate was present (either Early or Late)
             return await _context.AttendanceRecords
-                .Where(r => r.CandidateId == candidateId && r.CohortId == cohortId &&
-                            (r.Status == AttendanceStatus.Early || r.Status == AttendanceStatus.Late))
-                .Select(r => r.Date).Distinct().CountAsync();
+                .Where(r => r.CandidateId == candidateId && r.Candidate.CohortId == cohortId &&
+                            (r.Status == AttendanceStatus.Early || r.Status == AttendanceStatus.Late))  // Filter based on attendance status
+                .Select(r => r.Date)
+                .Distinct()
+                .CountAsync();
         }
-
 
 
     }
