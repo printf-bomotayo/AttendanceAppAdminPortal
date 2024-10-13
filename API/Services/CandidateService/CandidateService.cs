@@ -2,73 +2,164 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using API.DTOs;
 using API.Entities;
-using API.Repository.CandidateRepo;
+using API.Data;
+using Microsoft.EntityFrameworkCore;
+using API.DTOs.CandidateDTOs;
 
-namespace API.Services.Implementations
+namespace API.Services.CandidateService
+
 {
     public class CandidateService : ICandidateService
     {
-        private readonly ICandidateRepository _candidateRepository;
-        public CandidateService(ICandidateRepository candidateRepository)
+        private readonly AppDbContext _context;
+        public CandidateService(AppDbContext context)
         {
-            _candidateRepository = candidateRepository;
-
+            _context = context;
         }
+
         public async Task<CandidateDetailDto> GetCandidateByIdAsync(int id)
         {
-            return await _candidateRepository.GetCandidateByIdAsync(id);
+            return await _context.Candidates
+                .Where(c => c.Id == id)
+                .Select(c => new CandidateDetailDto
+                {
+                    Id = c.Id,
+                    FirstName = c.FirstName,
+                    LastName = c.LastName,
+                    Email = c.Email,
+                    CandidateGender = c.CandidateGender,
+                    PhoneNumber = c.PhoneNumber,
+                    StaffId = c.StaffId,
+                    Department = c.Department,
+                    CohortId = c.CohortId,
+                    Groups = c.Groups.Select(g => g.Name).ToList()
+                }).FirstOrDefaultAsync();
         }
+
 
         public async Task<CandidateAttendanceDto> GetCandidateByIdForAttendanceAsync(int id)
         {
-            return await _candidateRepository.GetCandidateByIdForAttendanceAsync(id);
+            return await _context.Candidates
+                .Where(c => c.Id == id)
+                .Select(c => new CandidateAttendanceDto
+                {
+                    Id = c.Id,
+                    Email = c.Email,
+                    FingerprintData = c.FingerprintData,
+                    FaceRecognitionData = c.FaceRecognitionData
+                }).FirstOrDefaultAsync();
         }
 
         public async Task<CandidateDetailDto> GetCandidateByStaffIdAsync(string staffId)
         {
-            return await _candidateRepository.GetCandidateByStaffIdAsync(staffId);
+            return await _context.Candidates
+                .Where(c => c.StaffId == staffId)
+                .Select(c => new CandidateDetailDto
+                {
+                    Id = c.Id,
+                    FirstName = c.FirstName,
+                    LastName = c.LastName,
+                    Email = c.Email,
+                    CandidateGender = c.CandidateGender,
+                    PhoneNumber = c.PhoneNumber,
+                    StaffId = c.StaffId,
+                    Department = c.Department,
+                    CohortId = c.CohortId,
+                    Groups = c.Groups.Select(g => g.Name).ToList()
+                }).FirstOrDefaultAsync();
+
         }
 
         public async Task<List<CandidateDto>> GetCandidatesByCohortAsync(int cohortId)
         {
-            return await _candidateRepository.GetCandidatesByCohortAsync(cohortId);
+            return await _context.Candidates
+                .Where(c => c.CohortId == cohortId)
+                .Select(c => new CandidateDto
+                {
+                    Id = c.Id,
+                    FirstName = c.FirstName,
+                    LastName = c.LastName,
+                    Email = c.Email,
+                    CandidateGender = c.CandidateGender
+                }).ToListAsync();
         }
 
-        public async  Task<List<CandidateDto>> GetCandidatesByDepartmentAsync(string department)
+        public async Task<List<CandidateDto>> GetCandidatesByDepartmentAsync(string department)
         {
-            return await _candidateRepository.GetCandidatesByDepartmentAsync(department);
+            return await _context.Candidates
+                .Where(c => c.Department == department)
+                .Select(c => new CandidateDto
+                {
+                    Id = c.Id,
+                    FirstName = c.FirstName,
+                    LastName = c.LastName,
+                    Email = c.Email,
+                    CandidateGender = c.CandidateGender
+                }).ToListAsync();
         }
 
         public async Task<List<CandidateDto>> GetCandidatesByGenderAsync(string gender)
         {
-            return await _candidateRepository.GetCandidatesByGenderAsync(gender);
+            return await _context.Candidates
+                .Where(c => c.CandidateGender.ToString() == gender)
+                .Select(c => new CandidateDto
+                {
+                    Id = c.Id,
+                    FirstName = c.FirstName,
+                    LastName = c.LastName,
+                    Email = c.Email,
+                    CandidateGender = c.CandidateGender
+                }).ToListAsync();
         }
 
         public async Task<List<CandidateDto>> GetCandidatesByNameAsync(string name)
         {
-            return await _candidateRepository.GetCandidatesByNameAsync(name);
+            return await _context.Candidates
+               .Where(c => c.FirstName.Contains(name) || c.LastName.Contains(name))
+               .Select(c => new CandidateDto
+               {
+                   Id = c.Id,
+                   FirstName = c.FirstName,
+                   LastName = c.LastName,
+                   Email = c.Email,
+                   CandidateGender = c.CandidateGender
+               }).ToListAsync();
         }
 
         public async Task<List<CandidateDto>> GetCandidatesAsync()
         {
-            return await _candidateRepository.GetCandidatesAsync();
+            return await _context.Candidates
+               .Select(c => new CandidateDto
+               {
+                   Id = c.Id,
+                   FirstName = c.FirstName,
+                   LastName = c.LastName,
+                   Email = c.Email,
+                   CandidateGender = c.CandidateGender
+               }).ToListAsync();
         }
 
         public async Task AddAsync(Candidate candidate)
         {
-            await _candidateRepository.AddAsync(candidate);
+            await _context.Candidates.AddAsync(candidate);
+            await _context.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(Candidate candidate)
         {
-            await _candidateRepository.UpdateAsync(candidate);
+            _context.Candidates.Update(candidate);
+            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(int id)
         {
-           await _candidateRepository.DeleteAsync(id);
+            var candidate = await _context.Candidates.FirstOrDefaultAsync(c => c.Id == id);
+            if (candidate != null)
+            {
+                _context.Candidates.Remove(candidate);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

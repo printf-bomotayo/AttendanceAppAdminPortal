@@ -2,21 +2,16 @@ using System.Text;
 using API.Data;
 using API.Entities;
 using API.Middleware;
-using API.Repository.AttendanceRecordRepo;
-using API.Repository.CandidateRepo;
-using API.Repository.CohortRepo;
-using API.Repository.TrainingProgramRepo;
 using API.Services;
 using API.Services.AttendanceRecordService;
 using API.Services.CandidateAuthService;
+using API.Services.CandidateService;
 using API.Services.CohortService;
 using API.Services.EmailService;
-using API.Services.Implementations;
 using API.Services.TrainingProgramService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
@@ -110,16 +105,12 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<TokenService>();
 
-builder.Services.AddScoped<ICandidateRepository, CandidateRepository>();
 builder.Services.AddScoped<ICandidateService, CandidateService>();
 
-builder.Services.AddScoped<ICohortRepository, CohortRepository>();
 builder.Services.AddScoped<ICohortService, CohortService>();
 
-builder.Services.AddScoped<ITrainingProgramRepository, TrainingProgramRepository>();
 builder.Services.AddScoped<ITrainingProgramService, TrainingProgramService>();
 
-builder.Services.AddScoped<IAttendanceRecordRepository, AttendanceRecordRepository>();
 builder.Services.AddScoped<IAttendanceRecordService, AttendanceRecordService>();
 
 builder.Services.AddScoped<IEmailService, EmailService>();
@@ -129,6 +120,10 @@ builder.Services.Configure<EmailSmtpSettings>(builder.Configuration.GetSection("
 builder.Services.Configure<List<string>>(builder.Configuration.GetSection("ValidEmailDomains"));
 
 builder.Services.AddAWSLambdaHosting(LambdaEventSource.HttpApi);
+
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 
 // Configure redis cahing service

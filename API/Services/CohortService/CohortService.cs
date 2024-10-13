@@ -1,66 +1,172 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using API.Data;
+using API.DTOs.CohortDTOs;
 using API.Entities;
-using API.Repository.CandidateRepo;
-using API.Repository.CohortRepo;
+using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Services.CohortService
 {
     public class CohortService : ICohortService
     {
-        private readonly ICohortRepository _cohortRepository;
-        private readonly ICandidateRepository _candidateRepository;
-        public CohortService(ICohortRepository cohortRepository, ICandidateRepository candidateRepository)
+        private readonly AppDbContext _context;
+        private readonly IMapper _mapper;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public CohortService(AppDbContext context, IMapper mapper, IHttpContextAccessor httpContextAccessor)
         {
-            _candidateRepository = candidateRepository;
-            _cohortRepository = cohortRepository;
+            _context = context;
+            _mapper = mapper;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-         public async Task<Cohort> GetCohortByIdAsync(int id)
+        // Create a new cohort
+        public async Task<Cohort> CreateCohortAsync(CohortCreateDto cohortCreateDto)
         {
-            return await _cohortRepository.GetCohortByIdAsync(id);
+            var cohort = _mapper.Map<Cohort>(cohortCreateDto);
+
+            // Set CreatedBy and CreatedDate
+            var currentUserId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            cohort.CreatedBy = currentUserId;
+            cohort.CreatedDate = DateTime.UtcNow;
+
+            cohort.ModifiedBy = currentUserId;
+            cohort.ModifiedDate = DateTime.UtcNow;
+
+            await _context.Cohorts.AddAsync(cohort);
+            await _context.SaveChangesAsync();
+
+            return cohort;
         }
 
-        public async Task AddCandidateToCohortAsync(int cohortId, Candidate candidate)
+
+
+
+        public async Task<Cohort> UpdateCohortAsync(int cohortId, CohortUpdateDto cohortUpdateDto)
         {
-            var cohort = await _cohortRepository.GetCohortByIdAsync(cohortId);
+            var cohort = await _context.Cohorts.FindAsync(cohortId);
+
             if (cohort == null)
             {
-                throw new KeyNotFoundException("Cohort not found");
+                throw new KeyNotFoundException($"Cohort with ID {cohortId} not found.");
             }
 
-            candidate.CohortId = cohortId;
+            // Map updated fields from DTO
+            _mapper.Map(cohortUpdateDto, cohort);
+
+            // Set ModifiedBy and ModifiedDate
+            var currentUserId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            cohort.ModifiedBy = currentUserId;
+            cohort.ModifiedDate = DateTime.UtcNow;
+
+            _context.Cohorts.Update(cohort);
+            await _context.SaveChangesAsync();
+
+            return cohort;
+        }
+
+
+
+        // GET: Get cohort by ID
+       
+
+
+
+
+        // Get all cohorts with general details
+        public async Task<List<CohortDto>> GetAllCohortsAsync()
+        {
+            var cohorts = await _context.Cohorts
+                .Include(c => c.TrainingProgram)
+                .Include(c => c.CandidatesList)
+                .Select(c => new CohortDto
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Description = c.Description,
+                    StartDate = c.StartDate,
+                    EndDate = c.EndDate,
+                    Status = c.Status,
+                    TrainingProgramName = c.TrainingProgram.Name,
+                    TotalCandidates = c.CandidatesList.Count
+                })
+                .ToListAsync();
+
+            return cohorts;
+        }
+
+
+        public async Task<CohortDetailDto> GetCohortByIdAsync(int cohortId)
+        {
+            var cohort = await _context.Cohorts
+                .Include(c => c.TrainingProgram)
+                .Include(c => c.CandidatesList)
+                .FirstOrDefaultAsync(c => c.Id == cohortId);
+
+            if (cohort == null) return null;
+
+            return new CohortDetailDto
+            {
+                Name = cohort.Name,
+                Description = cohort.Description,
+                StartDate = cohort.StartDate,
+                EndDate = cohort.EndDate,
+                Status = cohort.Status,
+                TrainingProgramName = cohort.TrainingProgram.Name,
+                TotalCandidates = cohort.CandidatesList.Count,
+                CreatedDate = cohort.CreatedDate,
+                ModifiedDate = cohort.ModifiedDate,
+                CreatedBy = cohort.CreatedBy,
+                ModifiedBy = cohort.ModifiedBy,
+                CandidateNames = cohort.CandidatesList.Select(c => $"{c.FirstName} {c.LastName}").ToList()
+            };
+        }
+
+
+        public async Task DeleteAsync(int cohortId)
+        {
+            var cohort = await _context.Cohorts.Include(c => c.CandidatesList).FirstOrDefaultAsync(c => c.Id == cohortId);
+
+            if (cohort != null)
+            {
+                _context.Cohorts.Remove(cohort);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        // Method to add a candidate to a cohort
+        public async Task AddCandidateToCohortAsync(int cohortId, Candidate candidate)
+        {
+            // Check if the cohort exists
+            var cohort = await _context.Cohorts
+                .Include(c => c.CandidatesList)
+                .FirstOrDefaultAsync(c => c.Id == cohortId);
+
+            if (cohort == null)
+            {
+                throw new KeyNotFoundException($"Cohort with ID {cohortId} not found.");
+            }
+
+            // Check if the candidate is already in the cohort
+            if (cohort.CandidatesList.Any(c => c.Id == candidate.Id))
+            {
+                throw new InvalidOperationException($"Candidate with ID {candidate.Id} is already in the cohort.");
+            }
+
+            // Add the candidate to the cohort
             cohort.CandidatesList.Add(candidate);
 
-            await _candidateRepository.AddAsync(candidate);
-            await _cohortRepository.UpdateCohortAsync(cohort);
-        }
+            // Set the cohort ID on the candidate entity
+            candidate.CohortId = cohortId;
 
-        public async Task<Cohort> GetByIdAsync(int id)
-        {
-            return await _cohortRepository.GetByIdAsync(id);
-        }
-
-        public async Task<List<Cohort>> GetAllAsync()
-        {
-            return await _cohortRepository.GetAllAsync();
-        }
-
-        public async Task AddAsync(Cohort cohort)
-        {
-            await _cohortRepository.AddAsync(cohort);
-        }
-
-        public async Task UpdateAsync(Cohort cohort)
-        {
-            await _cohortRepository.UpdateAsync(cohort);
-        }
-
-        public async Task DeleteAsync(int id)
-        {
-            await _cohortRepository.DeleteAsync(id);
+            // Update the cohort and save changes
+            _context.Cohorts.Update(cohort);
+            await _context.SaveChangesAsync();
         }
     }
 }

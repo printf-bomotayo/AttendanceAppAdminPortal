@@ -1,6 +1,6 @@
 using API.Entities;
 
-namespace API.DTOs
+namespace API.DTOs.CandidateDTOs
 {
     public class CandidateSignUpDto
     {

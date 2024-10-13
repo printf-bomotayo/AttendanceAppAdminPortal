@@ -1,6 +1,7 @@
-using API.DTOs;
+using API.DTOs.CandidateDTOs;
 using API.Entities;
 using API.Services;
+using API.Services.CandidateService;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -11,7 +12,7 @@ namespace API.Controllers
         private readonly ICandidateService _candidateService;
         public CandidatesController(ICandidateService candidateService)
         {
-            _candidateService = candidateService;                        
+            _candidateService = candidateService;
         }
 
         [HttpGet]
@@ -23,7 +24,7 @@ namespace API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<CandidateDetailDto>> GetCandidate(int id)
         {
-            var candidate = await  _candidateService.GetCandidateByIdAsync(id);
+            var candidate = await _candidateService.GetCandidateByIdAsync(id);
 
             if (candidate == null) return NotFound();
 

@@ -1,4 +1,4 @@
-using API.DTOs;
+using API.DTOs.NotificationDTOs;
 using API.Services.NotificationService;
 using Microsoft.AspNetCore.Mvc;
 

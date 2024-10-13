@@ -1,3 +1,5 @@
+using API.DTOs.CohortDTOs;
+using API.DTOs.TrainingProgramDTOs;
 using API.Entities;
 using API.Services.TrainingProgramService;
 using Microsoft.AspNetCore.Mvc;
@@ -12,24 +14,28 @@ namespace API.Controllers
             _trainingProgramService = trainingProgramService;
 
         }
-        
-        [HttpPost("{trainingProgramId}/cohorts")]
-        public async Task<IActionResult> AddCohortToTrainingProgram(int trainingProgramId, [FromBody] Cohort cohort)
+
+        // POST: Add a cohort to a training program
+        [HttpPost("{trainingProgramId}/add-cohort")]
+        public async Task<IActionResult> AddCohortToTrainingProgram(int trainingProgramId, [FromBody] CohortCreateDto cohortCreateDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             try
             {
-                await _trainingProgramService.AddCohortToTrainingProgramAsync(trainingProgramId, cohort);
-                return Ok();
+                await _trainingProgramService.AddCohortToTrainingProgramAsync(trainingProgramId, cohortCreateDto);
+                return Ok(new { message = "Cohort successfully added to the training program." });
             }
-            catch (KeyNotFoundException)
+            catch (KeyNotFoundException ex)
             {
-                return NotFound("Training Program not found");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return NotFound(ex.Message);
             }
         }
+
+
 
         [HttpGet("{id}")]
         public async Task<ActionResult<TrainingProgram>> GetById(int id)
@@ -49,24 +55,40 @@ namespace API.Controllers
             return Ok(trainingPrograms);
         }
 
+
+
         [HttpPost]
-        public async Task<ActionResult> Add(TrainingProgram trainingProgram)
+        public async Task<IActionResult> CreateTrainingProgram([FromBody] TrainingProgramDto trainingProgramDto)
         {
-            await _trainingProgramService.AddAsync(trainingProgram);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var trainingProgram = await _trainingProgramService.CreateTrainingProgramAsync(trainingProgramDto);
             return CreatedAtAction(nameof(GetById), new { id = trainingProgram.Id }, trainingProgram);
         }
 
+
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, TrainingProgram trainingProgram)
+        public async Task<IActionResult> UpdateTrainingProgram(int trainingProgramId, [FromBody] TrainingProgramUpdateDto trainingProgramUpdateDto)
         {
-            if (id != trainingProgram.Id)
+            if (!ModelState.IsValid)
             {
-                return BadRequest();
+                return BadRequest(ModelState);
             }
 
-            await _trainingProgramService.UpdateAsync(trainingProgram);
-            return NoContent();
+            try
+            {
+                var updatedProgram = await _trainingProgramService.UpdateAsync(trainingProgramId, trainingProgramUpdateDto);
+                return Ok(updatedProgram);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)

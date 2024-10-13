@@ -18,6 +18,9 @@ namespace API.Entities
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
 
+        // Computed property for linking with TrainingProgram
+        public TrainingProgram TrainingProgram => Candidate?.Cohort?.TrainingProgram;
+
     }
 
     public enum AttendanceStatus

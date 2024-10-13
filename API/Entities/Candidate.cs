@@ -12,6 +12,7 @@ namespace API.Entities
         public List<CandidatesGroup> Groups { get; set; }
         public string Department { get; set; }
         public int CohortId { get; set; }
+        public Cohort Cohort { get; set; }
         public byte[] PasswordHash { get; set; }
         public byte[] PasswordSalt { get; set; }
         public List<AttendanceRecord> AttendanceRecords { get; set; } = new();

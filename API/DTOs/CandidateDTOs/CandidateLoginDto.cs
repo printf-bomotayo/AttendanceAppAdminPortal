@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace API.DTOs
+namespace API.DTOs.CandidateDTOs
 {
-    public class RegisterDto : LoginDto
+    public class CandidateLoginDto
     {
         public string Email { get; set; }
-        
+        public string Password { get; set; }
     }
 }

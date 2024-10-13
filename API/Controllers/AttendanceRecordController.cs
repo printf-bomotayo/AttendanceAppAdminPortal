@@ -1,8 +1,12 @@
 using API.DTOs;
+using API.DTOs.AttendanceDTOs;
+using API.DTOs.CandidateDTOs;
 using API.Entities;
 using API.Services;
 using API.Services.AttendanceRecordService;
+using API.Services.CandidateService;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
@@ -28,7 +32,7 @@ namespace API.Controllers
             if (!IsLocationValid(attendanceMarkDto.Latitude, attendanceMarkDto.Longitude))
             {
                 return BadRequest("Invalid location");
-                
+
             }
 
             try
@@ -66,8 +70,8 @@ namespace API.Controllers
             var lateTimeThreshold = new TimeSpan(8, 0, 0); // 8:00 AM
             var checkInTime = DateTime.UtcNow.TimeOfDay; // Current time of check-in
 
-			// print the checkintime and late timespan to review and compare the format
-			Console.WriteLine(checkInTime.ToString(), lateTimeThreshold.ToString());
+            // print the checkintime and late timespan to review and compare the format
+            Console.WriteLine(checkInTime.ToString(), lateTimeThreshold.ToString());
 
             // determine attendance status
             var attendanceStatus = checkInTime > lateTimeThreshold
@@ -92,15 +96,15 @@ namespace API.Controllers
         }
 
 
+
         [HttpGet]
-		public async Task<ActionResult<List<AttendanceRecordResponseDto>>> GetAll()
+		public async Task<ActionResult<List<AttendanceRecordDto>>> GetAll()
 		{
 			var attendanceRecords = await _attendanceRecordService.GetAllAsync();
 
-			var attendanceRecordDtos = attendanceRecords.Select(ar => new AttendanceRecordResponseDto
+
+            var attendanceRecordDtos = attendanceRecords.Select(ar => new AttendanceRecordDto
 			{
-				Id = ar.Id,
-				CandidateId = ar.CandidateId,
 				Date = ar.Date,
 				Status = ar.Status,
 				CheckInTime = ar.CheckInTime,
@@ -112,6 +116,8 @@ namespace API.Controllers
 
 			return Ok(attendanceRecordDtos);
 		}
+
+
 
 		[HttpGet("{id}")]
 		public async Task<ActionResult<AttendanceRecordResponseDto>> GetById(int id)
@@ -185,29 +191,22 @@ namespace API.Controllers
 			return NoContent();
 		}
 
+
+        // endpoint to allow candidates fetch and view their attendance record in real time
+        // same endpoint can also allow admin fetch attendance records for a particular candidate and verify their presence
 		[HttpGet("{candidate_id}/attendance-records")]
 		public async Task<ActionResult<IEnumerable<AttendanceRecordDto>>> GetAttendanceRecordsByCandidateId(int candidate_id)
 		{
 			var attendanceRecords = await _attendanceRecordService.GetByCandidateIdAsync(candidate_id);
 
-			if (attendanceRecords == null || !attendanceRecords.Any())
-			{
-				return NotFound("No attendance records found for this candidate.");
-			}
+            if (attendanceRecords == null || !attendanceRecords.Any())
+            {
+                return NotFound("No attendance records found for this candidate.");
+            }
 
-			var attendanceRecordDtos = attendanceRecords.Select(ar => new AttendanceRecordDto
-			{
-				Date = ar.Date,
-				Status = ar.Status,
-				CheckInTime = ar.CheckInTime,
-				CheckOutTime = ar.CheckOutTime,
-				Location = ar.Location,
-				Latitude = ar.Latitude,
-				Longitude = ar.Longitude
-			}).ToList();
-
-			return Ok(attendanceRecordDtos);
+			return Ok(attendanceRecords);
 		}
+
 
         [HttpGet("candidates/{candidateId}/attendance-summary")]
         public async Task<ActionResult<CandidateAttendanceSummaryDto>> GetCandidateAttendanceSummary(int candidateId, int cohortId)

@@ -1,4 +1,5 @@
-using API.DTOs;
+using API.DTOs.AuthenticationDTOs;
+using API.DTOs.CandidateDTOs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Services.CandidateAuthService

@@ -1,5 +1,8 @@
+using API.DTOs.CandidateDTOs;
+using API.DTOs.CohortDTOs;
 using API.Entities;
 using API.Services.CohortService;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -7,16 +10,61 @@ namespace API.Controllers
     public class CohortController : BaseApiController
     {
         private readonly ICohortService _cohortService;
-        public CohortController(ICohortService cohortService)
+        private readonly IMapper _mapper;
+        public CohortController(ICohortService cohortService, IMapper mapper)
         {
             _cohortService = cohortService;
+            _mapper = mapper;
 
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Cohort>> GetById(int id)
+        // Get all cohorts
+        [HttpGet]
+        public async Task<ActionResult<List<CohortDto>>> GetAllCohorts()
         {
-            var cohort = await _cohortService.GetByIdAsync(id);
+            var cohorts = await _cohortService.GetAllCohortsAsync();
+            return Ok(cohorts);
+        }
+
+
+        // POST: Create a new cohort
+        [HttpPost]
+        public async Task<IActionResult> CreateCohort([FromBody] CohortCreateDto cohortCreateDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var createdCohort = await _cohortService.CreateCohortAsync(cohortCreateDto);
+            return CreatedAtAction(nameof(GetCohortById), new { id = createdCohort.Id }, createdCohort);
+        }
+
+        // PUT: Update an existing cohort
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateCohort(int id, [FromBody] CohortUpdateDto cohortUpdateDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var updatedCohort = await _cohortService.UpdateCohortAsync(id, cohortUpdateDto);
+                return Ok(updatedCohort);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        // GET: Get cohort by ID
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetCohortById(int id)
+        {
+            var cohort = await _cohortService.GetCohortByIdAsync(id);
             if (cohort == null)
             {
                 return NotFound();
@@ -24,55 +72,34 @@ namespace API.Controllers
             return Ok(cohort);
         }
 
-        [HttpGet]
-        public async Task<ActionResult<List<Cohort>>> GetAll()
-        {
-            var cohorts = await _cohortService.GetAllAsync();
-            return Ok(cohorts);
-        }
 
-        [HttpPost]
-        public async Task<ActionResult> Add(Cohort cohort)
-        {
-            await _cohortService.AddAsync(cohort);
-            return CreatedAtAction(nameof(GetById), new { id = cohort.Id }, cohort);
-        }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, Cohort cohort)
+        // POST: Add a candidate to a cohort
+        [HttpPost("{cohortId}/add-candidate")]
+        public async Task<IActionResult> AddCandidateToCohort(int cohortId, [FromBody] CandidateDto candidateDto)
         {
-            if (id != cohort.Id)
+            if (!ModelState.IsValid)
             {
-                return BadRequest();
+                return BadRequest(ModelState);
             }
 
-            await _cohortService.UpdateAsync(cohort);
-            return NoContent();
-        }
+            // Map the DTO to the Candidate entity
+            var candidate = _mapper.Map<Candidate>(candidateDto);
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            await _cohortService.DeleteAsync(id);
-            return NoContent();
-        }
-
-        [HttpPost("{cohortId}/candidates")]
-        public async Task<IActionResult> AddCandidateToCohort(int cohortId, [FromBody] Candidate candidate)
-        {
             try
             {
                 await _cohortService.AddCandidateToCohortAsync(cohortId, candidate);
-                return Ok();
+                return Ok(new { message = "Candidate successfully added to the cohort." });
             }
-            catch (KeyNotFoundException)
+            catch (KeyNotFoundException ex)
             {
-                return NotFound("Cohort not found");
+                return NotFound(ex.Message);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return BadRequest(ex.Message);
             }
         }
+
     }
 }

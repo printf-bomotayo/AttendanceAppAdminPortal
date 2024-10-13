@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
-using API.DTOs;
+using API.DTOs.AuthenticationDTOs;
+using API.DTOs.CandidateDTOs;
 using API.Services.CandidateAuthService;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,7 +27,7 @@ namespace API.Controllers
             {
                 return BadRequest("Invalid email.");
             }
-            
+
             try
             {
                 var token = await _candidateAuthService.Signup(signupDto);
@@ -77,9 +78,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                 return BadRequest(ex.Message);
+                return BadRequest(ex.Message);
             }
-            
+
         }
 
 

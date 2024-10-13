@@ -1,4 +1,4 @@
-﻿namespace API.DTOs
+﻿namespace API.DTOs.CandidateDTOs
 {
     public class CandidateAttendanceSummaryDto
     {
@@ -10,7 +10,7 @@
         // Aggregated attendance details
         public int TotalAppearances { get; set; } // Total days candidate marked attendance
         public double AttendancePercentage { get; set; } // Percentage appearance based on presence
-        
+
 
         // Additional properties if needed
         public int TotalDays { get; set; } // Total days of the training program so far

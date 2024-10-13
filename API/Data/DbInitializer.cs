@@ -35,7 +35,7 @@ namespace API.Data
             {
                 new TrainingProgram
                 {
-                    Title = "Software Engineering Bootcamp",
+                    Name = "Software Engineering Bootcamp",
                     Description = "An intensive bootcamp for aspiring software engineers.",
                     FacilitatingInstitution = "Tech Academy",
                     Location = "New York, NY",
@@ -45,7 +45,7 @@ namespace API.Data
                 },
                 new TrainingProgram
                 {
-                    Title = "Data Science Program",
+                    Name = "Data Science Program",
                     Description = "A comprehensive program on data science and analytics.",
                     FacilitatingInstitution = "Data Institute",
                     Location = "San Francisco, CA",
@@ -55,7 +55,7 @@ namespace API.Data
                 },
                 new TrainingProgram
                 {
-                    Title = "Cybersecurity Certification",
+                    Name = "Cybersecurity Certification",
                     Description = "A certification program for cybersecurity professionals.",
                     FacilitatingInstitution = "Security Experts",
                     Location = "Austin, TX",
@@ -80,7 +80,7 @@ namespace API.Data
                     Description = "First Cohort Description",
                     StartDate = new DateTime(2023, 01, 01),
                     EndDate = new DateTime(2023, 06, 30),
-                    Status = Cohort.ActivityStatus.Active,
+                    Status = "Active",
                     CandidatesList = new List<Candidate>(),
                     TrainingProgramId = trainingPrograms.FirstOrDefault().Id,
                     CreatedDate = DateTime.UtcNow,
@@ -94,7 +94,7 @@ namespace API.Data
                     Description = "Second Cohort Description",
                     StartDate = new DateTime(2023, 07, 01),
                     EndDate = new DateTime(2023, 12, 31),
-                    Status = Cohort.ActivityStatus.Pending,
+                    Status = "Pending",
                     CandidatesList = new List<Candidate>(),
                     TrainingProgramId = trainingPrograms.ElementAt(1).Id,
                     CreatedDate = DateTime.UtcNow,
@@ -108,7 +108,7 @@ namespace API.Data
                     Description = "Third Cohort Description",
                     StartDate = new DateTime(2024, 01, 01),
                     EndDate = new DateTime(2024, 06, 30),
-                    Status = Cohort.ActivityStatus.Completed,
+                    Status = "Completed",
                     CandidatesList = new List<Candidate>(),
                     TrainingProgramId = trainingPrograms.ElementAt(2).Id,
                     CreatedDate = DateTime.UtcNow,
