@@ -7,7 +7,6 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "attendanceappapi-dev.us-east-1.elasticbeanstalk.com:5000"
     },
     "Mock Lambda Test Tool": {
       "commandName": "Executable",
