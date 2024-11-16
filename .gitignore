@@ -482,7 +482,3 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
-API/appsettings.json
-API/appsettings.Development.json
-API/Migrations/20240722141204_IdentityAdded.cs
-API/Migrations/20240722141204_IdentityAdded.Designer.cs
