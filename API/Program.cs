@@ -119,7 +119,7 @@ builder.Services.Configure<EmailSmtpSettings>(builder.Configuration.GetSection("
 
 builder.Services.Configure<List<string>>(builder.Configuration.GetSection("ValidEmailDomains"));
 
-builder.Services.AddAWSLambdaHosting(LambdaEventSource.HttpApi);
+//builder.Services.AddAWSLambdaHosting(LambdaEventSource.HttpApi);
 
 builder.Services.AddHttpContextAccessor();
 
