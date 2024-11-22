@@ -28,29 +28,18 @@ namespace API.Controllers
                 return BadRequest("Invalid email.");
             }
 
-            try
-            {
-                var token = await _candidateAuthService.Signup(signupDto);
-                return Ok(new { Token = token });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var token = await _candidateAuthService.Signup(signupDto);
+            return Ok(new { Token = token });
+
+         
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login(CandidateLoginDto loginDto)
         {
-            try
-            {
-                var token = await _candidateAuthService.Login(loginDto);
-                return Ok(new { Token = token });
-            }
-            catch (Exception ex)
-            {
-                return Unauthorized(ex.Message);
-            }
+            var token = await _candidateAuthService.Login(loginDto);
+            return Ok(new { Token = token });
+        
         }
 
 
@@ -71,15 +60,9 @@ namespace API.Controllers
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] PasswordResetDto dto)
         {
-            try
-            {
-                await _candidateAuthService.ResetPasswordAsync(dto);
-                return Ok("Password reset successful.");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await _candidateAuthService.ResetPasswordAsync(dto);
+            return Ok("Password reset successful.");
+            
 
         }
 

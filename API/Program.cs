@@ -126,6 +126,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 
+
 // Configure redis cahing service
 // builder.Services.AddStackExchangeRedisCache(options =>
 // {
@@ -135,13 +136,17 @@ builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 
+// Use the custom exception middleware
 app.UseMiddleware<ExceptionMiddleware>();
+app.UseAuthorization();
+
+app.MapControllers();
+
 
 app.UseCors(opt =>
 {
-    opt.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("http://localhost:3000");
+    opt.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("*"); //("http://localhost:3000");
 });
 
 // if (app.Environment.IsDevelopment())
@@ -163,12 +168,12 @@ app.UseSwaggerUI();
 // });
 
 
-// app.UseHttpsRedirection();
+// Configure the HTTP request pipeline.
+
+app.UseHttpsRedirection();
 app.UseAuthentication();
 
-app.UseAuthorization();
 
-app.MapControllers();
 
 var scope = app.Services.CreateScope();
 

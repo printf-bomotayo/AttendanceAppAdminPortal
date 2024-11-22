@@ -23,16 +23,18 @@ namespace API.Controllers
             {
                 return BadRequest(ModelState);
             }
+            await _trainingProgramService.AddCohortToTrainingProgramAsync(trainingProgramId, cohortCreateDto);
+            return Ok(new { message = "Cohort successfully added to the training program." });
 
-            try
-            {
-                await _trainingProgramService.AddCohortToTrainingProgramAsync(trainingProgramId, cohortCreateDto);
-                return Ok(new { message = "Cohort successfully added to the training program." });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            //try
+            //{
+            //    await _trainingProgramService.AddCohortToTrainingProgramAsync(trainingProgramId, cohortCreateDto);
+            //    return Ok(new { message = "Cohort successfully added to the training program." });
+            //}
+            //catch (KeyNotFoundException ex)
+            //{
+            //    return NotFound(ex.Message);
+            //}
         }
 
 
@@ -77,16 +79,17 @@ namespace API.Controllers
             {
                 return BadRequest(ModelState);
             }
-
-            try
-            {
-                var updatedProgram = await _trainingProgramService.UpdateAsync(trainingProgramId, trainingProgramUpdateDto);
-                return Ok(updatedProgram);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            var updatedProgram = await _trainingProgramService.UpdateAsync(trainingProgramId, trainingProgramUpdateDto);
+            return Ok(updatedProgram);
+            //try
+            //{
+            //    var updatedProgram = await _trainingProgramService.UpdateAsync(trainingProgramId, trainingProgramUpdateDto);
+            //    return Ok(updatedProgram);
+            //}
+            //catch (KeyNotFoundException ex)
+            //{
+            //    return NotFound(ex.Message);
+            //}
         }
 
 

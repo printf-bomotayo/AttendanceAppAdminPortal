@@ -49,15 +49,16 @@ namespace API.Controllers
                 return BadRequest(ModelState);
             }
 
-            try
-            {
-                var updatedCohort = await _cohortService.UpdateCohortAsync(id, cohortUpdateDto);
-                return Ok(updatedCohort);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            var updatedCohort = await _cohortService.UpdateCohortAsync(id, cohortUpdateDto);
+            return Ok(updatedCohort);
+            //try
+            //{
+                
+            //}
+            //catch (KeyNotFoundException ex)
+            //{
+            //    return NotFound(ex.Message);
+            //}
         }
 
         // GET: Get cohort by ID
@@ -86,19 +87,21 @@ namespace API.Controllers
             // Map the DTO to the Candidate entity
             var candidate = _mapper.Map<Candidate>(candidateDto);
 
-            try
-            {
-                await _cohortService.AddCandidateToCohortAsync(cohortId, candidate);
-                return Ok(new { message = "Candidate successfully added to the cohort." });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await _cohortService.AddCandidateToCohortAsync(cohortId, candidate);
+            return Ok(new { message = "Candidate successfully added to the cohort." });
+            //try
+            //{
+            //    await _cohortService.AddCandidateToCohortAsync(cohortId, candidate);
+            //    return Ok(new { message = "Candidate successfully added to the cohort." });
+            //}
+            //catch (KeyNotFoundException ex)
+            //{
+            //    return NotFound(ex.Message);
+            //}
+            //catch (InvalidOperationException ex)
+            //{
+            //    return BadRequest(ex.Message);
+            //}
         }
 
     }

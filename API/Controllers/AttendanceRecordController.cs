@@ -103,12 +103,16 @@ namespace API.Controllers
 			var attendanceRecords = await _attendanceRecordService.GetAllAsync();
 
 
-            var attendanceRecordDtos = attendanceRecords.Select(ar => new AttendanceRecordDto
+            var attendanceRecordDtos = attendanceRecords.Select(ar => new AttendanceRecordResponseDto
 			{
 				Date = ar.Date,
 				Status = ar.Status,
 				CheckInTime = ar.CheckInTime,
 				CheckOutTime = ar.CheckOutTime,
+                CandidateStaffId = ar.Candidate.StaffId,
+                CandidateId = ar.CandidateId,
+                CandidateName = ar.Candidate.FirstName + " " + ar.Candidate.LastName,
+                CandidateEmail = ar.Candidate.Email,
 				Location = ar.Location,
 				Latitude = ar.Latitude,
 				Longitude = ar.Longitude
@@ -222,16 +226,9 @@ namespace API.Controllers
         [HttpGet("candidates/attendance-summary/{cohortId}")]
         public async Task<IActionResult> GetCandidateAttendanceSummaries(int cohortId)
         {
-            try
-            {
-                var summaries = await _attendanceRecordService.GetAllCandidateAttendanceSummariesAsync(cohortId);
-                return Ok(summaries);
-            }
-            catch (Exception ex)
-            {
-                // Handle exceptions appropriately
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing the request.");
-            }
+            var summaries = await _attendanceRecordService.GetAllCandidateAttendanceSummariesAsync(cohortId);
+            return Ok(summaries);
+           
         }
 
 
