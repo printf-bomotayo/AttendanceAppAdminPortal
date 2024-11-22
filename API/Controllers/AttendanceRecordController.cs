@@ -141,7 +141,12 @@ namespace API.Controllers
 			{
 				Id = attendanceRecord.Id,
 				CandidateId = attendanceRecord.CandidateId,
-				Date = attendanceRecord.Date,
+                CandidateStaffId = attendanceRecord.Candidate?.StaffId ?? "N/A",
+                CandidateName = attendanceRecord.Candidate != null
+                                ? $"{attendanceRecord.Candidate.FirstName} {attendanceRecord.Candidate.LastName}"
+                                : "Unknown Candidate",
+                CandidateEmail = attendanceRecord.Candidate?.Email ?? "N/A",
+                Date = attendanceRecord.Date,
 				Status = attendanceRecord.Status,
 				CheckInTime = attendanceRecord.CheckInTime,
 				CheckOutTime = attendanceRecord.CheckOutTime,
