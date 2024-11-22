@@ -100,26 +100,30 @@ namespace API.Controllers
         [HttpGet]
 		public async Task<ActionResult<List<AttendanceRecordDto>>> GetAll()
 		{
-			var attendanceRecords = await _attendanceRecordService.GetAllAsync();
+            var attendanceRecords = await _attendanceRecordService.GetAllAsync();
 
+            if (attendanceRecords == null || !attendanceRecords.Any())
+                return NotFound("No attendance records found.");
 
             var attendanceRecordDtos = attendanceRecords.Select(ar => new AttendanceRecordResponseDto
-			{
-				Date = ar.Date,
-				Status = ar.Status,
-				CheckInTime = ar.CheckInTime,
-				CheckOutTime = ar.CheckOutTime,
-                CandidateStaffId = ar.Candidate.StaffId,
+            {
+                Date = ar.Date,
+                Status = ar.Status,
+                CheckInTime = ar.CheckInTime,
+                CheckOutTime = ar.CheckOutTime,
+                CandidateStaffId = ar.Candidate?.StaffId ?? "N/A",
                 CandidateId = ar.CandidateId,
-                CandidateName = ar.Candidate.FirstName + " " + ar.Candidate.LastName,
-                CandidateEmail = ar.Candidate.Email,
-				Location = ar.Location,
-				Latitude = ar.Latitude,
-				Longitude = ar.Longitude
-			}).ToList();
+                CandidateName = ar.Candidate != null
+                                ? $"{ar.Candidate.FirstName} {ar.Candidate.LastName}"
+                                : "Unknown Candidate",
+                CandidateEmail = ar.Candidate?.Email ?? "N/A",
+                Location = ar.Location,
+                Latitude = ar.Latitude,
+                Longitude = ar.Longitude
+            }).ToList();
 
-			return Ok(attendanceRecordDtos);
-		}
+            return Ok(attendanceRecordDtos);
+        }
 
 
 

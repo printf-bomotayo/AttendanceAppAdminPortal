@@ -42,7 +42,11 @@ namespace API.Services.AttendanceRecordService
 
         public async Task<List<AttendanceRecord>> GetAllAsync()
         {
-            return await _context.AttendanceRecords.ToListAsync();
+            //return await _context.AttendanceRecords.ToListAsync();
+            
+            return await _context.AttendanceRecords
+                    .Include(ar => ar.Candidate) // Ensure Candidate is included
+                    .ToListAsync();
         }
 
         public async Task AddAsync(AttendanceRecord attendanceRecord)
