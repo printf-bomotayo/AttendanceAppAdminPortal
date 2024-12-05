@@ -297,6 +297,77 @@ namespace API.Controllers
             return NoContent();
         }
 
+        [HttpGet("{candidateId}/download")]
+        public async Task<IActionResult> DownloadCandidateAttendanceRecords(
+        int candidateId,
+        [FromQuery] DateTime startDate,
+        [FromQuery] DateTime endDate,
+        [FromQuery] string format = "csv") // Default format is CSV
+        {
+            var records = await _attendanceRecordService.GetAttendanceRecordsByDateRangeAsync(candidateId, startDate, endDate);
+
+            if (!records.Any())
+            {
+                return NotFound("No attendance records found for the specified candidate and date range.");
+            }
+
+            switch (format.ToLower())
+            {
+                case "pdf":
+                    var pdfFile = await _attendanceRecordService.GeneratePdfAsync(records); // Generate PDF
+                    return File(pdfFile, "application/pdf", "Candidate_Attendance_Records.pdf");
+                        
+                case "csv":
+                    var csvFile = await _attendanceRecordService.GenerateCsvAsync(records); // Generate CSV
+                    return File(csvFile, "text/csv", $"Candidate_Attendance_Records.csv");
+
+                default:
+                    return BadRequest("Invalid format. Supported formats are 'pdf' and 'csv'.");
+            }
+        }
+        [HttpGet("download-attendance-summary-by-cohort")]
+        public async Task<IActionResult> DownloadAllCandidatesAttendanceSummary(int cohortId)
+        {
+            var records = await _attendanceRecordService.GetAllCandidateAttendanceSummariesAsync(cohortId);
+
+            if (!records.Any()) return NotFound("No attendance records found");
+
+            if (records.Count > 0) 
+            { 
+                var csvFile = await _attendanceRecordService.GenerateCsvAllRecords(records);
+                return File(csvFile, "text/csv", "Candidates_Records.csv");   
+            };
+
+            return BadRequest("Error occured generating report");
+        }
+
+        [HttpGet("download-attendance-by-status")]
+        public async Task<IActionResult> DownloadAttendanceRecordsByPunctualityStatus([FromQuery] string status) // Default format is CSV
+        {
+            //downloads all attendance record for all candidates if no status  is specified
+            if(status == null)
+            {
+                //List<AttendanceRecord> allrecords = new List<AttendanceRecord>();
+                var allrecords = await _attendanceRecordService.GetAllCandidatesRecordsAsync();
+                var csvFile = await _attendanceRecordService.GenerateCsvAsync(allrecords); // Generate CSV
+                return File(csvFile, "text/csv", $"All_Candidates_Attendance_Records.csv");
+            }
+            var records = await _attendanceRecordService.GetAttendanceRecordsByPunctualityStatus(status);
+
+            if (!records.Any())
+            {
+                return NotFound("No attendance records found for the specified candidate and date range.");
+            }
+            if (records.Count > 0)
+            {
+                var csvFile = await _attendanceRecordService.GenerateCsvAsync(records); // Generate CSV
+                return File(csvFile, "text/csv", $"Candidate_Attendance_Status_Records.csv");
+            }
+            else
+            {
+                return BadRequest("Error occured while fetching report");
+            }            
+        }
 
         private bool IsLocationValid(double candidateLatitude, double candidateLongitude)
         {
@@ -311,7 +382,7 @@ namespace API.Controllers
             // Calculate the distance between the candidate's location and the reference point
             double distance = CalculateDistance(candidateLatitude, candidateLongitude, referenceLatitude, referenceLongitude);
 
-            return distance <= radiusInMeters;
+            return distance <= radiusInMeters; 
         }
 
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ namespace API.Services.AttendanceRecordService
         Task<AttendanceRecord> GetByIdAsync(int id);
 
         Task<List<AttendanceRecord>> GetAllAsync();
+        Task<List<AttendanceRecordResponseDto>> GetAllCandidatesRecordsAsync();
 
         Task AddAsync(AttendanceRecord attendanceRecord);
 
@@ -22,6 +24,7 @@ namespace API.Services.AttendanceRecordService
         Task<List<AttendanceRecordResponseDto>> FilterAttendanceRecordsAsync(string name, string email, string staffId);
 
         Task<List<AttendanceRecordResponseDto>> GetAttendanceRecordsByDateRangeAsync(int candidateId, DateTime startDate, DateTime endDate);
+        Task<List<AttendanceRecordResponseDto>> GetAttendanceRecordsByPunctualityStatus(string status);
 
         Task<CandidateAttendanceSummaryDto> GetCandidateAttendanceSummaryAsync(int candidateId, int cohortId);
         Task<List<CandidateAttendanceSummaryDto>> GetAllCandidateAttendanceSummariesAsync(int cohortId);
@@ -29,5 +32,12 @@ namespace API.Services.AttendanceRecordService
         Task UpdateAsync(AttendanceRecord attendanceRecord);
 
         Task DeleteAsync(int id);
+
+        Task<byte[]> GenerateCsvAsync(IEnumerable<AttendanceRecordResponseDto> records);
+
+        Task<byte[]> GeneratePdfAsync(IEnumerable<AttendanceRecordResponseDto> attendanceRecords);
+
+        Task<byte[]> GenerateCsvAllRecords(List<CandidateAttendanceSummaryDto> allrecords);
+
     }
 }

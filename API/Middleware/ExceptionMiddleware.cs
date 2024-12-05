@@ -28,7 +28,7 @@ namespace API.Middleware
                 _logger.LogError(ex, "An unhandled exception occurred for request {Path}", context.Request.Path);
                 await HandleExceptionAsync(context, ex);
             }
-        }
+         }
 
         private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
