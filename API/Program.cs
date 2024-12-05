@@ -161,12 +161,21 @@ app.UseCors(opt =>
 
 
 // Allow swagger for both development and production environment
-app.UseSwagger();
-app.UseSwaggerUI();
+//app.UseSwagger();
+// app.UseSwaggerUI();
 // app.UseSwaggerUI(c =>
 // {
 //     c.ConfigObject.AdditionalItems.Add("persistAuthorization", "true");
 // });
+
+// Allow swagger for both development and production environment
+app.UseSwagger();
+//app.UseSwaggerUI();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Attendance API V1");
+    c.RoutePrefix = string.Empty;
+});
 
 
 // Configure the HTTP request pipeline.
